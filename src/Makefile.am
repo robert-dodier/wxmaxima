@@ -8,6 +8,7 @@ bin_PROGRAMS = wxmaxima
 
 wxmaxima_SOURCES = \
 	ConfigDialogue.cpp         ConfigDialogue.h         \
+	Config.cpp         Config.h         \
 	main.cpp                            \
 	wxMaxima.cpp       wxMaxima.h       \
 	wxMaximaFrame.cpp  wxMaximaFrame.h  \

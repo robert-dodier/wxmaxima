@@ -31,6 +31,7 @@
 #include <iostream>
 
 #include "wxMaxima.h"
+#include "Config.h"
 #include "Setup.h"
 
 // On wxGTK2 we support printing only if wxWidgets is compiled with gnome_print.
@@ -101,6 +102,7 @@ bool MyApp::OnInit()
 #else
   wxConfig::Set(new wxConfig(wxT("wxMaxima")));
 #endif
+  Config *cfg = new Config;
 
   wxImage::AddHandler(new wxPNGHandler);
   wxImage::AddHandler(new wxXPMHandler);
