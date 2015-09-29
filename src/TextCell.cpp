@@ -90,6 +90,11 @@ void TextCell::RecalculateWidths(CellParser& parser, int fontsize)
 {
   SetAltText(parser);
 
+  wxASSERT_MSG(fontsize>0,_("Bug: Fontsize <= 0")); 
+  wxASSERT_MSG(fontsize<1000,_("Bug: Fontsize suspiciously large.")); 
+
+  // Recalculate only if the font size has changed, we stoll have no width data
+  // or if we have forced an update.
   if (m_height == -1 || m_width == -1 || fontsize != m_fontSize || parser.ForceUpdate())
   {
     m_fontSize = fontsize;
@@ -107,15 +112,12 @@ void TextCell::RecalculateWidths(CellParser& parser, int fontsize)
       else
         dc.GetTextExtent(wxT("(\%o")+LabelWidthText()+wxT(")/R/"), &m_width, &m_height);
       m_fontSizeLabel = m_fontSize;
-      std::cerr<<"m_fontSize="<<m_fontSize<<"\n";
       dc.GetTextExtent(m_text, &m_labelWidth, &m_labelHeight);
       dc.GetTextExtent(m_text, &m_labelWidth, &m_labelHeight);
-      std::cerr<<"m_fontSizeLabel="<<m_fontSizeLabel<<"\n";
       if(m_fontSizeLabel<2)m_fontSizeLabel = 2;
       if(m_fontSizeLabel>1000)m_fontSizeLabel = 20;
       while ((m_labelWidth >= m_width)&&(m_fontSizeLabel > 2)) {
         int fontsize1 = (int) (((double) --m_fontSizeLabel) * scale + 0.5);
-        std::cerr<<"fontsize1="<<fontsize1<<"\n";
         dc.SetFont(wxFont(fontsize1, wxFONTFAMILY_MODERN,
               parser.IsItalic(m_textStyle),
               parser.IsBold(m_textStyle),
@@ -172,6 +174,7 @@ void TextCell::Draw(CellParser& parser, wxPoint point, int fontsize)
   double scale = parser.GetScale();
   wxDC& dc = parser.GetDC();
 
+  wxASSERT_MSG(fontsize > 0,_("Bug: Font size <= 0!"));
   if (m_width == -1 || m_height == -1)
     RecalculateWidths(parser, fontsize);
 

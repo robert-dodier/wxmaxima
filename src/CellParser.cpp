@@ -80,16 +80,13 @@ wxString CellParser::GetFontName(int type)
 {
   if (type == TS_TITLE || type == TS_SUBSECTION || type == TS_SUBSUBSECTION || type == TS_SECTION || type == TS_TEXT)
   {
-    std::cerr<<"Font="<<m_styles[type].font<<"\n";
     return m_styles[type].font;
   }
   else if (type == TS_NUMBER || type == TS_VARIABLE || type == TS_FUNCTION ||
       type == TS_SPECIAL_CONSTANT || type == TS_STRING)
   {
-    std::cerr<<"Font="<<m_mathFontName<<"\n";
     return m_mathFontName;
   }
-    std::cerr<<"Font="<<m_fontName<<"\n";
   return m_fontName;
 }
 
@@ -98,11 +95,9 @@ void CellParser::ReadStyle()
   // Font
   m_fontName = Config::Get()->m_styleDefault.font;
   // Default fontsize
-  int m_defaultFontSize = Config::Get()->m_fontSize;
-  int m_mathFontSize = Config::Get()->m_mathFontSize;
+  m_defaultFontSize = Config::Get()->m_fontSize;
+  m_mathFontSize = Config::Get()->m_mathFontSize;
 
-  std::cerr<<"m_defaultFontSize="<<m_defaultFontSize<<"\n";
-  std::cerr<<"m_mathFontSize="<<m_mathFontSize<<"\n";
   // Encoding - used only for comments
 
   m_fontEncoding = (wxFontEncoding)Config::Get()->m_fontEncoding;
