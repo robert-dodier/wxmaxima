@@ -107,9 +107,15 @@ void TextCell::RecalculateWidths(CellParser& parser, int fontsize)
       else
         dc.GetTextExtent(wxT("(\%o")+LabelWidthText()+wxT(")/R/"), &m_width, &m_height);
       m_fontSizeLabel = m_fontSize;
+      std::cerr<<"m_fontSize="<<m_fontSize<<"\n";
       dc.GetTextExtent(m_text, &m_labelWidth, &m_labelHeight);
-      while (m_labelWidth >= m_width) {
+      dc.GetTextExtent(m_text, &m_labelWidth, &m_labelHeight);
+      std::cerr<<"m_fontSizeLabel="<<m_fontSizeLabel<<"\n";
+      if(m_fontSizeLabel<2)m_fontSizeLabel = 2;
+      if(m_fontSizeLabel>1000)m_fontSizeLabel = 20;
+      while ((m_labelWidth >= m_width)&&(m_fontSizeLabel > 2)) {
         int fontsize1 = (int) (((double) --m_fontSizeLabel) * scale + 0.5);
+        std::cerr<<"fontsize1="<<fontsize1<<"\n";
         dc.SetFont(wxFont(fontsize1, wxFONTFAMILY_MODERN,
               parser.IsItalic(m_textStyle),
               parser.IsBold(m_textStyle),

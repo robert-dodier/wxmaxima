@@ -20,6 +20,7 @@
 //
 
 #include "Bitmap.h"
+#include "Config.h"
 #include "CellParser.h"
 #include "GroupCell.h"
 
@@ -59,10 +60,8 @@ void Bitmap::Layout()
     RecalculateSize();
   }
   else {
-    int fontsize = 12;
-    wxConfig::Get()->Read(wxT("fontSize"), &fontsize);
-    int mfontsize = fontsize;
-    wxConfig::Get()->Read(wxT("mathfontsize"), &mfontsize);
+    int fontsize = Config::Get()->m_fontSize;
+    int mfontsize = Config::Get()->m_mathFontSize;
     GroupCell* tmp = (GroupCell *)m_tree;
 
     wxMemoryDC dc;
@@ -96,10 +95,8 @@ double Bitmap::GetRealHeight()
 
 void Bitmap::RecalculateSize()
 {
-  int fontsize = 12;
-  wxConfig::Get()->Read(wxT("fontSize"), &fontsize);
-  int mfontsize = fontsize;
-  wxConfig::Get()->Read(wxT("mathfontsize"), &mfontsize);
+  int fontsize = Config::Get()->m_fontSize;
+  int mfontsize = Config::Get()->m_mathFontSize;
   MathCell* tmp = m_tree;
 
   wxMemoryDC dc;
@@ -116,10 +113,8 @@ void Bitmap::RecalculateSize()
 
 void Bitmap::RecalculateWidths()
 {
-  int fontsize = 12;
-  wxConfig::Get()->Read(wxT("fontSize"), &fontsize);
-  int mfontsize = fontsize;
-  wxConfig::Get()->Read(wxT("mathfontsize"), &mfontsize);
+  int fontsize = Config::Get()->m_fontSize;
+  int mfontsize = Config::Get()->m_mathFontSize;
 
   MathCell* tmp = m_tree;
 
@@ -203,9 +198,10 @@ void Bitmap::Draw()
   dc.SelectObject(m_bmp);
   dc.SetUserScale(m_scale,m_scale);
 
-  wxString bgColStr = wxT("white");
-  wxConfig::Get()->Read(wxT("Style/Background/color"), &bgColStr);
-  dc.SetBackground(*(wxTheBrushList->FindOrCreateBrush(bgColStr, wxBRUSHSTYLE_SOLID)));
+  dc.SetBackground(*(wxTheBrushList->FindOrCreateBrush(
+                       Config::Get()->m_styleBackground.color,
+                       wxBRUSHSTYLE_SOLID)
+                     ));
   dc.Clear();
 
   if (tmp != NULL)
@@ -213,12 +209,9 @@ void Bitmap::Draw()
     wxPoint point;
     point.x = 0;
     point.y = tmp->GetMaxCenter();
-    int fontsize = 12;
+    int fontsize = Config::Get()->m_fontSize;
+    int mfontsize = Config::Get()->m_mathFontSize;
     int drop = tmp->GetMaxDrop();
-
-    wxConfig::Get()->Read(wxT("fontSize"), &fontsize);
-    int mfontsize = fontsize;
-    wxConfig::Get()->Read(wxT("mathfontsize"), &mfontsize);
 
     CellParser parser(dc);
 
@@ -320,10 +313,8 @@ void Bitmap::DestroyTree()
 void Bitmap::BreakUpCells()
 {
   MathCell *tmp = m_tree;
-  int fontsize = 12;
-  wxConfig::Get()->Read(wxT("fontSize"), &fontsize);
-  int mfontsize = fontsize;
-  wxConfig::Get()->Read(wxT("mathfontsize"), &mfontsize);
+  int fontsize = Config::Get()->m_fontSize;
+  int mfontsize = Config::Get()->m_mathFontSize;
   wxMemoryDC dc;
   dc.SelectObject(m_bmp);
   dc.SetUserScale(m_scale,m_scale);

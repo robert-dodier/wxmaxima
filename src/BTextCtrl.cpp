@@ -20,6 +20,7 @@
 
 #include "BTextCtrl.h"
 #include <wx/config.h>
+#include <Config.h>
 
 BTextCtrl::BTextCtrl(wxWindow *parent,
                      wxWindowID id,
@@ -29,12 +30,9 @@ BTextCtrl::BTextCtrl(wxWindow *parent,
                      long style)
     : wxTextCtrl(parent, id, value, pos, size, style)
 {
-  bool fixedFont = true;
-  m_matchParens = true;
+  bool fixedFont = Config::Get()->m_fixedFontTC;
+  m_matchParens = Config::Get()->m_matchParens;
   m_skipTab = true;
-  wxConfigBase *config = wxConfig::Get();
-  config->Read(wxT("matchParens"), &m_matchParens);
-  config->Read(wxT("fixedFontTC"), &fixedFont);
   if (fixedFont)
   {
 #if defined (__WXGTK12__) && !defined (__WXGTK20__)

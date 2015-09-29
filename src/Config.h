@@ -39,8 +39,8 @@ knows the default values of everything.
 class Config
 {
 public:
-  //! Returns a pointer to our config object
-  static Config *GetConfig() { return m_configInstance;}
+  //! Returns a pointer to the only instance of the config object
+  static Config *Get() { return m_configInstance;}
 
   Config()
     {
@@ -49,9 +49,12 @@ public:
       RevertToDefault();
       Read();
     }
-  
+
+  //! Read the config
   void Read();
+  //! Reset all values to their default values
   void RevertToDefault();
+  //! Writes the whole config
   void Write();
 
   bool m_matchParens;
@@ -142,6 +145,7 @@ public:
 private:
   //! The pointer to the instance of the config object we may have instantiated
   static Config *m_configInstance;
+  //! The wxConfig we actually read from and write to
   wxConfigBase *m_config;
 };
   

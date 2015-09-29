@@ -239,7 +239,7 @@ void Config::RevertToDefault()
   m_styleSubsubsection.italic = false;
   m_styleSubsubsection.underlined = false;
   m_styleSubsubsection.font = m_styleDefault.font;
-  m_styleSubsubsection.fontSize = 16;
+  m_styleSubsubsection.fontSize = 14;
   // Subsection
   m_styleSubsection.color = wxT("black");
   m_styleSubsection.bold = true;
@@ -309,7 +309,6 @@ void Config::Read()
   m_config->Read(wxT("pollStdOut"), &m_pollStdOut);
   m_config->Read(wxT("fontsize"), &m_fontSize);
   m_config->Read(wxT("mathfontsize"), &m_mathFontSize);
-  m_config->Read(wxT("Style/fontname"), &m_styleDefault.font);
   m_config->Read(wxT("fontEncoding"), &m_fontEncoding);
   m_config->Read(wxT("Style/Math/fontname"), &m_mathFontName);
   m_config->Read(wxT("Style/Subsection/fontsize"), &m_styleSubsection.fontSize);
@@ -335,12 +334,7 @@ void Config::Read()
   m_config->Read(wxT(where "underlined"),                                 \
                &style.underlined);                                        \
   }
-
-  m_config->Read(wxT("Style/Subsubsection/fontsize"),
-               &m_styleSubsubsection.fontSize);
-  m_config->Read(wxT("Style/Subsubsection/fontname"),
-               &m_styleSubsubsection.font);
-
+  
   READ_STYLE(m_styleString, "Style/String/")
   READ_STYLE(m_styleNumber, "Style/Number/")
   READ_STYLE(m_styleInput, "Style/Input/")
@@ -367,7 +361,9 @@ void Config::Read()
   READ_STYLE(m_styleSection, "Style/Section/")
   READ_STYLE(m_styleTitle, "Style/Title/")
 #undef READ_STYLE
-    
+
+  m_config->Read(wxT("Style/fontname"), &m_styleDefault.font);
+
   m_config->Read(wxT("Style/Text/fontsize"),
                &m_styleText.fontSize);
   m_config->Read(wxT("Style/Text/fontname"),
@@ -377,6 +373,16 @@ void Config::Read()
                &m_styleSection.fontSize);
   m_config->Read(wxT("Style/Section/fontname"),
                &m_styleSection.font);
+
+  m_config->Read(wxT("Style/Subsubsection/fontsize"),
+               &m_styleSubsubsection.fontSize);
+  m_config->Read(wxT("Style/Subsubsection/fontname"),
+               &m_styleSubsubsection.font);
+
+  m_config->Read(wxT("Style/Subsection/fontsize"),
+               &m_styleSubsubsection.fontSize);
+  m_config->Read(wxT("Style/Subsection/fontname"),
+               &m_styleSubsubsection.font);
 
   m_config->Read(wxT("Style/Title/fontsize"),
                &m_styleTitle.fontSize);

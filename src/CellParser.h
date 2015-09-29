@@ -86,8 +86,14 @@ public:
   int GetFontSize(int st)
   {
     if (st == TS_TEXT || st == TS_SUBSUBSECTION || st == TS_SUBSECTION || st == TS_SECTION || st == TS_TITLE)
+    {
+      std::cerr<<"FontSize="<<m_styles[st].fontSize<<",zoom="<<m_zoomFactor<<"\n";
+      wxASSERT_MSG(m_zoomFactor * double(m_styles[st].fontSize) > 0,wxT("Bug: Font size too small!"));
       return int(m_zoomFactor * double(m_styles[st].fontSize));
-    return 0;
+    }
+    std::cerr<<"No font size."<<"\n";
+    //wxASSERT(wxT("Bug: No font size!"));
+    return int(m_zoomFactor * double(m_styles[TS_TEXT].fontSize));
   }
   void Outdated(bool outdated) { m_outdated = outdated; }
   bool CheckTeXFonts() { return m_TeXFonts; }

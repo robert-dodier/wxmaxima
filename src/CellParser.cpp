@@ -21,7 +21,7 @@
 #include "CellParser.h"
 
 #include <wx/font.h>
-#include <wx/config.h>
+#include "Config.h"
 #include "MathCell.h"
 
 CellParser::CellParser(wxDC& dc) : m_dc(dc)
@@ -41,13 +41,9 @@ CellParser::CellParser(wxDC& dc) : m_dc(dc)
       wxFontEnumerator::IsValidFacename(m_fontCMRI = wxT("jsMath-cmr10")) &&
       wxFontEnumerator::IsValidFacename(m_fontCMMI = wxT("jsMath-cmmi10")) &&
       wxFontEnumerator::IsValidFacename(m_fontCMTI = wxT("jsMath-cmti10")))
-  {
-    m_TeXFonts = true;
-    wxConfig::Get()->Read(wxT("usejsmath"), &m_TeXFonts);
-  }
+    m_TeXFonts = Config::Get()->m_usejsmath;
 
-  m_keepPercent = true;
-  wxConfig::Get()->Read(wxT("keepPercent"), &m_keepPercent);
+  m_keepPercent =  Config::Get()->m_keepPercent;
 
   ReadStyle();
 }
@@ -69,10 +65,7 @@ CellParser::CellParser(wxDC& dc, double scale) : m_dc(dc)
       wxFontEnumerator::IsValidFacename(m_fontCMRI = wxT("jsMath-cmr10")) &&
       wxFontEnumerator::IsValidFacename(m_fontCMMI = wxT("jsMath-cmmi10")) &&
       wxFontEnumerator::IsValidFacename(m_fontCMTI = wxT("jsMath-cmti10")))
-  {
-    m_TeXFonts = true;
-    wxConfig::Get()->Read(wxT("usejsmath"), &m_TeXFonts);
-  }
+    m_TeXFonts = Config::Get()->m_usejsmath;
 
   m_keepPercent = true;
   wxConfig::Get()->Read(wxT("keepPercent"), &m_keepPercent);
@@ -86,280 +79,131 @@ CellParser::~CellParser()
 wxString CellParser::GetFontName(int type)
 {
   if (type == TS_TITLE || type == TS_SUBSECTION || type == TS_SUBSUBSECTION || type == TS_SECTION || type == TS_TEXT)
+  {
+    std::cerr<<"Font="<<m_styles[type].font<<"\n";
     return m_styles[type].font;
+  }
   else if (type == TS_NUMBER || type == TS_VARIABLE || type == TS_FUNCTION ||
       type == TS_SPECIAL_CONSTANT || type == TS_STRING)
+  {
+    std::cerr<<"Font="<<m_mathFontName<<"\n";
     return m_mathFontName;
+  }
+    std::cerr<<"Font="<<m_fontName<<"\n";
   return m_fontName;
 }
 
 void CellParser::ReadStyle()
 {
-  wxConfigBase* config = wxConfig::Get();
-
   // Font
-  config->Read(wxT("Style/fontname"), &m_fontName);
-
+  m_fontName = Config::Get()->m_styleDefault.font;
   // Default fontsize
-  m_defaultFontSize = 12;
-  config->Read(wxT("fontSize"), &m_defaultFontSize);
-  m_mathFontSize = m_defaultFontSize;
-  config->Read(wxT("mathfontsize"), &m_mathFontSize);
+  int m_defaultFontSize = Config::Get()->m_fontSize;
+  int m_mathFontSize = Config::Get()->m_mathFontSize;
 
-  // Encogind - used only for comments
-  m_fontEncoding = wxFONTENCODING_DEFAULT;
-  int encoding = m_fontEncoding;
-  config->Read(wxT("fontEncoding"), &encoding);
-  m_fontEncoding = (wxFontEncoding)encoding;
+  std::cerr<<"m_defaultFontSize="<<m_defaultFontSize<<"\n";
+  std::cerr<<"m_mathFontSize="<<m_mathFontSize<<"\n";
+  // Encoding - used only for comments
+
+  m_fontEncoding = (wxFontEncoding)Config::Get()->m_fontEncoding;
 
   // Math font
-  m_mathFontName = wxEmptyString;
-  config->Read(wxT("Style/Math/fontname"), &m_mathFontName);
+  m_mathFontName = Config::Get()-> m_mathFontName;
 
   wxString tmp;
 
-#define READ_STYLES(type, where)                                    \
-  if (config->Read(wxT(where "color"), &tmp)) m_styles[type].color.Set(tmp);          \
-  config->Read(wxT(where "bold"), &m_styles[type].bold);            \
-  config->Read(wxT(where "italic"), &m_styles[type].italic);        \
-  config->Read(wxT(where "underlined"), &m_styles[type].underlined);
-
   // Normal text
-  m_styles[TS_DEFAULT].color = wxT("black");
-  m_styles[TS_DEFAULT].bold = true;
-  m_styles[TS_DEFAULT].italic = true;
-  m_styles[TS_DEFAULT].underlined = false;
-  READ_STYLES(TS_DEFAULT, "Style/NormalText/")
+  m_styles[TS_DEFAULT] = Config::Get() -> m_styleDefault;
 
   // Text
-  m_styles[TS_TEXT].color = wxT("black");
-  m_styles[TS_TEXT].bold = false;
-  m_styles[TS_TEXT].italic = false;
-  m_styles[TS_TEXT].underlined = false;
-  m_styles[TS_TEXT].fontSize = 0;
-  config->Read(wxT("Style/Text/fontsize"),
-               &m_styles[TS_TEXT].fontSize);
-  config->Read(wxT("Style/Text/fontname"),
-               &m_styles[TS_TEXT].font);
-  READ_STYLES(TS_TEXT, "Style/Text/")
-
+  m_styles[TS_TEXT]    = Config::Get() -> m_styleText;
+  
   // Variables in highlighted code
-  m_styles[TS_CODE_VARIABLE].color = wxT("rgb(0,128,0)");
-  m_styles[TS_CODE_VARIABLE].bold = false;
-  m_styles[TS_CODE_VARIABLE].italic = true;
-  m_styles[TS_CODE_VARIABLE].underlined = false;
-  READ_STYLES(TS_CODE_VARIABLE, "Style/CodeHighlighting/Variable/")
+  m_styles[TS_CODE_VARIABLE] = Config::Get() -> m_styleCodeHighlightingVariable;
 
   // Keywords in highlighted code
-  m_styles[TS_CODE_FUNCTION].color = wxT("rgb(128,0,0)");
-  m_styles[TS_CODE_FUNCTION].bold = false;
-  m_styles[TS_CODE_FUNCTION].italic = true;
-  m_styles[TS_CODE_FUNCTION].underlined = false;
-  READ_STYLES(TS_CODE_FUNCTION, "Style/CodeHighlighting/Function/")
+  m_styles[TS_CODE_FUNCTION] = Config::Get() -> m_styleCodeHighlightingFunction;
 
   // Comments in highlighted code
-  m_styles[TS_CODE_COMMENT].color = wxT("rgb(64,64,64)");
-  m_styles[TS_CODE_COMMENT].bold = false;
-  m_styles[TS_CODE_COMMENT].italic = true;
-  m_styles[TS_CODE_COMMENT].underlined = false;
-  READ_STYLES(TS_CODE_COMMENT, "Style/CodeHighlighting/Comment/")
+  m_styles[TS_CODE_COMMENT] =  Config::Get() -> m_styleCodeHighlightingComment;
 
   // Numbers in highlighted code
-  m_styles[TS_CODE_NUMBER].color = wxT("rgb(128,64,0)");
-  m_styles[TS_CODE_NUMBER].bold = false;
-  m_styles[TS_CODE_NUMBER].italic = true;
-  m_styles[TS_CODE_NUMBER].underlined = false;
-  READ_STYLES(TS_CODE_NUMBER, "Style/CodeHighlighting/Number/")
+  m_styles[TS_CODE_NUMBER]  = Config::Get()  -> m_styleCodeHighlightingNumber;
 
   // Strings in highlighted code
-  m_styles[TS_CODE_STRING].color = wxT("rgb(0,0,128)");
-  m_styles[TS_CODE_STRING].bold = false;
-  m_styles[TS_CODE_STRING].italic = true;
-  m_styles[TS_CODE_STRING].underlined = false;
-  READ_STYLES(TS_CODE_STRING, "Style/CodeHighlighting/String/")
+  m_styles[TS_CODE_STRING]  = Config::Get()  -> m_styleCodeHighlightingString;
 
   // Operators in highlighted code
-  m_styles[TS_CODE_OPERATOR].color = wxT("rgb(0,0,0)");
-  m_styles[TS_CODE_OPERATOR].bold = false;
-  m_styles[TS_CODE_OPERATOR].italic = true;
-  m_styles[TS_CODE_OPERATOR].underlined = false;
-  READ_STYLES(TS_CODE_OPERATOR, "Style/CodeHighlighting/Operator/")
+  m_styles[TS_CODE_OPERATOR] = Config::Get() -> m_styleCodeHighlightingOperator;
     
   // Line endings in highlighted code
-  m_styles[TS_CODE_ENDOFLINE].color = wxT("rgb(128,128,128)");
-  m_styles[TS_CODE_ENDOFLINE].bold = false;
-  m_styles[TS_CODE_ENDOFLINE].italic = true;
-  m_styles[TS_CODE_ENDOFLINE].underlined = false;
-  READ_STYLES(TS_CODE_ENDOFLINE, "Style/CodeHighlighting/EndOfLine/")
+  m_styles[TS_CODE_ENDOFLINE] = Config::Get()-> m_styleCodeHighlightingEndOfLine;
     
   // Subsubsection
-  m_styles[TS_SUBSUBSECTION].color = wxT("black");
-  m_styles[TS_SUBSUBSECTION].bold = true;
-  m_styles[TS_SUBSUBSECTION].italic = false;
-  m_styles[TS_SUBSUBSECTION].underlined = false;
-  m_styles[TS_SUBSUBSECTION].fontSize = 14;
-  config->Read(wxT("Style/Subsubsection/fontsize"),
-               &m_styles[TS_SUBSUBSECTION].fontSize);
-  config->Read(wxT("Style/Subsubsection/fontname"),
-               &m_styles[TS_SUBSUBSECTION].font);
-  READ_STYLES(TS_SUBSUBSECTION, "Style/Subsubsection/")
+  m_styles[TS_SUBSUBSECTION]  = Config::Get()-> m_styleSubsubsection;
 
   // Subsection
-  m_styles[TS_SUBSECTION].color = wxT("black");
-  m_styles[TS_SUBSECTION].bold = true;
-  m_styles[TS_SUBSECTION].italic = false;
-  m_styles[TS_SUBSECTION].underlined = false;
-  m_styles[TS_SUBSECTION].fontSize = 16;
-  config->Read(wxT("Style/Subsection/fontsize"),
-               &m_styles[TS_SUBSECTION].fontSize);
-  config->Read(wxT("Style/Subsection/fontname"),
-               &m_styles[TS_SUBSECTION].font);
-  READ_STYLES(TS_SUBSECTION, "Style/Subsection/")
+  m_styles[TS_SUBSECTION]  =    Config::Get()-> m_styleSubsection;
 
   // Section
-  m_styles[TS_SECTION].color = wxT("black");
-  m_styles[TS_SECTION].bold = true;
-  m_styles[TS_SECTION].italic = true;
-  m_styles[TS_SECTION].underlined = false;
-  m_styles[TS_SECTION].fontSize = 18;
-  config->Read(wxT("Style/Section/fontsize"),
-               &m_styles[TS_SECTION].fontSize);
-  config->Read(wxT("Style/Section/fontname"),
-               &m_styles[TS_SECTION].font);
-  READ_STYLES(TS_SECTION, "Style/Section/")
+  m_styles[TS_SECTION]     =    Config::Get()-> m_styleSection;
 
   // Title
-  m_styles[TS_TITLE].color = wxT("black");
-  m_styles[TS_TITLE].bold = true;
-  m_styles[TS_TITLE].italic = false;
-  m_styles[TS_TITLE].underlined = true;
-  m_styles[TS_TITLE].fontSize = 24;
-  config->Read(wxT("Style/Title/fontsize"),
-               &m_styles[TS_TITLE].fontSize);
-  config->Read(wxT("Style/Title/fontname"),
-               &m_styles[TS_TITLE].font);
-  READ_STYLES(TS_TITLE, "Style/Title/")
+  m_styles[TS_TITLE]       =    Config::Get()-> m_styleTitle;
 
   // Main prompt
-  m_styles[TS_MAIN_PROMPT].color = wxT("rgb(255,128,128)");
-  m_styles[TS_MAIN_PROMPT].bold = false;
-  m_styles[TS_MAIN_PROMPT].italic = false;
-  m_styles[TS_MAIN_PROMPT].underlined = false;
-  READ_STYLES(TS_MAIN_PROMPT, "Style/MainPrompt/")
+  m_styles[TS_MAIN_PROMPT]  =    Config::Get()-> m_styleMainPrompt;
 
   // Other prompt
-  m_styles[TS_OTHER_PROMPT].color = wxT("red");
-  m_styles[TS_OTHER_PROMPT].bold = false;
-  m_styles[TS_OTHER_PROMPT].italic = true;
-  m_styles[TS_OTHER_PROMPT].underlined = false;
-  READ_STYLES(TS_OTHER_PROMPT, "Style/OtherPrompt/");
+  m_styles[TS_OTHER_PROMPT]  =    Config::Get()-> m_styleOtherPrompt;
 
   // Labels
-  m_styles[TS_LABEL].color = wxT("rgb(255,192,128)");
-  m_styles[TS_LABEL].bold = false;
-  m_styles[TS_LABEL].italic = false;
-  m_styles[TS_LABEL].underlined = false;
-  READ_STYLES(TS_LABEL, "Style/Label/")
+  m_styles[TS_LABEL]         =    Config::Get()-> m_styleLabel;
 
   // User-defined Labels
-  m_styles[TS_USERLABEL].color = wxT("rgb(255,64,0)");
-  m_styles[TS_USERLABEL].bold = false;
-  m_styles[TS_USERLABEL].italic = false;
-  m_styles[TS_USERLABEL].underlined = false;
-  READ_STYLES(TS_USERLABEL, "Style/UserDefinedLabel/")
+  m_styles[TS_USERLABEL]     =    Config::Get()-> m_styleUserDefinedLabel;
 
-  // Special
-  m_styles[TS_SPECIAL_CONSTANT].color = m_styles[TS_DEFAULT].color;
-  m_styles[TS_SPECIAL_CONSTANT].bold = false;
-  m_styles[TS_SPECIAL_CONSTANT].italic = false;
-  m_styles[TS_SPECIAL_CONSTANT].underlined = false;
-  READ_STYLES(TS_SPECIAL_CONSTANT, "Style/Special/")
+  // Special constant
+  m_styles[TS_SPECIAL_CONSTANT] = Config::Get()-> m_styleSpecial;
 
   // Input
-  m_styles[TS_INPUT].color = wxT("blue");
-  m_styles[TS_INPUT].bold = false;
-  m_styles[TS_INPUT].italic = false;
-  m_styles[TS_INPUT].underlined = false;
-  READ_STYLES(TS_INPUT, "Style/Input/")
+  m_styles[TS_INPUT] = Config::Get()-> m_styleInput;
 
   // Number
-  m_styles[TS_NUMBER].color = m_styles[TS_DEFAULT].color;
-  m_styles[TS_NUMBER].bold = false;
-  m_styles[TS_NUMBER].italic = false;
-  m_styles[TS_NUMBER].underlined = false;
-  READ_STYLES(TS_NUMBER, "Style/Number/")
+  m_styles[TS_NUMBER] = Config::Get()-> m_styleNumber;
 
   // String
-  m_styles[TS_STRING].color = m_styles[TS_DEFAULT].color;
-  m_styles[TS_STRING].bold = false;
-  m_styles[TS_STRING].italic = true;
-  m_styles[TS_STRING].underlined = false;
-  READ_STYLES(TS_STRING, "Style/String/")
+  m_styles[TS_STRING] = Config::Get()-> m_styleString;
 
   // Greek
-  m_styles[TS_GREEK_CONSTANT].color = m_styles[TS_DEFAULT].color;
-  m_styles[TS_GREEK_CONSTANT].bold = false;
-  m_styles[TS_GREEK_CONSTANT].italic = false;
-  m_styles[TS_GREEK_CONSTANT].underlined = false;
-  READ_STYLES(TS_GREEK_CONSTANT, "Style/Greek/")
+  m_styles[TS_GREEK_CONSTANT] = Config::Get()-> m_styleGreek;
 
   // Variables
-  m_styles[TS_VARIABLE].color = m_styles[TS_DEFAULT].color;
-  m_styles[TS_VARIABLE].bold = false;
-  m_styles[TS_VARIABLE].italic = true;
-  m_styles[TS_VARIABLE].underlined = false;
-  READ_STYLES(TS_VARIABLE, "Style/Variable/")
+  m_styles[TS_VARIABLE] = Config::Get()-> m_styleVariable;
 
   // FUNCTIONS
-  m_styles[TS_FUNCTION].color = m_styles[TS_DEFAULT].color;
-  m_styles[TS_FUNCTION].bold = false;
-  m_styles[TS_FUNCTION].italic = false;
-  m_styles[TS_FUNCTION].underlined = false;
-  READ_STYLES(TS_FUNCTION, "Style/Function/")
+  m_styles[TS_FUNCTION] = Config::Get()-> m_styleFunction;
 
   // Highlight
-  m_styles[TS_HIGHLIGHT].color = m_styles[TS_DEFAULT].color;
-  if (config->Read(wxT("Style/Highlight/color"),
-                   &tmp)) m_styles[TS_HIGHLIGHT].color.Set(tmp);
+  m_styles[TS_HIGHLIGHT] = Config::Get()-> m_styleHighlight;
 
   // Text background
-  m_styles[TS_TEXT_BACKGROUND].color = wxColour(wxT("white"));
-  if (config->Read(wxT("Style/TextBackground/color"),
-                   &tmp)) m_styles[TS_TEXT_BACKGROUND].color.Set(tmp);
-
+  m_styles[TS_TEXT_BACKGROUND] = Config::Get()-> m_styleTextBackground;
+  
   // Cell bracket colors
-  m_styles[TS_CELL_BRACKET].color = wxColour(wxT("rgb(0,0,0)"));
-  if (config->Read(wxT("Style/CellBracket/color"),
-                   &tmp)) m_styles[TS_CELL_BRACKET].color.Set(tmp);
+  m_styles[TS_CELL_BRACKET] = Config::Get()-> m_styleCellBracket;
 
-  m_styles[TS_ACTIVE_CELL_BRACKET].color = wxT("rgb(255,0,0)");
-  if (config->Read(wxT("Style/ActiveCellBracket/color"),
-                  &tmp)) m_styles[TS_ACTIVE_CELL_BRACKET].color.Set(tmp);
+  m_styles[TS_ACTIVE_CELL_BRACKET] = Config::Get()-> m_styleActiveCellBracket;
 
   // Cursor (hcaret in MathCtrl and caret in EditorCell)
-  m_styles[TS_CURSOR].color = wxT("rgb(0,0,0)");
-  if (config->Read(wxT("Style/Cursor/color"),
-                   &tmp)) m_styles[TS_CURSOR].color.Set(tmp);
+  m_styles[TS_CURSOR] = Config::Get()-> m_styleCursor;
 
   // Selection color defaults to light grey on windows
-#if defined __WXMSW__
-  m_styles[TS_SELECTION].color = wxColour(wxT("light grey"));
-#else
-  m_styles[TS_SELECTION].color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-#endif
-  if (config->Read(wxT("Style/Selection/color"),
-                   &tmp)) m_styles[TS_SELECTION].color.Set(tmp);
-  m_styles[TS_EQUALSSELECTION].color = wxT("rgb(192,192,255)");
-  if (config->Read(wxT("Style/EqualsSelection/color"),
-                   &tmp)) m_styles[TS_EQUALSSELECTION].color.Set(tmp);
+  m_styles[TS_SELECTION] = Config::Get()-> m_styleSelection;
+  m_styles[TS_EQUALSSELECTION] = Config::Get()->m_styleEqualsSelection;
 
   // Outdated cells
-  m_styles[TS_OUTDATED].color = wxT("rgb(153,153,153)");
-  if (config->Read(wxT("Style/Outdated/color"),
-                     &tmp)) m_styles[TS_OUTDATED].color.Set(tmp);
-
-
-#undef READ_STYLES
+  m_styles[TS_OUTDATED] = Config::Get()-> m_styleOutdated;
 
   m_dc.SetPen(*(wxThePenList->FindOrCreatePen(m_styles[TS_DEFAULT].color, 1, wxPENSTYLE_SOLID)));
 }
