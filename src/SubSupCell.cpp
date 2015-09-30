@@ -20,6 +20,7 @@
 //
 
 #include "SubSupCell.h"
+#include "Config.h"
 #include <wx/config.h>
 #include "wx/config.h"
 
@@ -178,12 +179,8 @@ wxString SubSupCell::ToString()
 
 wxString SubSupCell::ToTeX()
 {
-  wxConfigBase *config = wxConfig::Get();
-
-  bool TeXExponentsAfterSubscript=false;
+  bool TeXExponentsAfterSubscript = Config::Get()->m_TeXExponentsAfterSubscript;
   
-  config->Read(wxT("TeXExponentsAfterSubscript"),&TeXExponentsAfterSubscript);
-
   wxString s;
 
   if(TeXExponentsAfterSubscript)

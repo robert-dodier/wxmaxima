@@ -23,6 +23,7 @@
 //
 
 #include "wxMaxima.h"
+#include "Config.h"
 #include "SubstituteWiz.h"
 #include "IntegrateWiz.h"
 #include "LimitWiz.h"
@@ -244,9 +245,7 @@ bool MyDropTarget::OnDropFiles(wxCoord x, wxCoord y, const wxArrayString& files)
 void wxMaxima::InitSession()
 {
   bool server = false;
-  int defaultPort = 4010;
-
-  wxConfig::Get()->Read(wxT("defaultPort"), &defaultPort);
+  int defaultPort = Config::Get()->m_defaultPort;
   m_port = defaultPort;
 
   while (!(server = StartServer()))
@@ -943,8 +942,7 @@ void wxMaxima::ReadFirstPrompt(wxString &data)
   {
     // Inform the user that the evaluation queue is empty.
     EvaluationQueueLength(0);
-    bool open = false;
-    wxConfig::Get()->Read(wxT("openHCaret"), &open);
+    bool open = Config::Get()->m_openHCaret;
     if (open)
       m_console->OpenNextOrCreateCell();
   }
@@ -1025,10 +1023,7 @@ void wxMaxima::ReadMath(wxString &data)
     else
       start = 0;
 
-    bool showUserDefinedLabels = true;
-
-    wxConfigBase *config = wxConfig::Get();
-    config->Read(wxT("showUserDefinedLabels"), &showUserDefinedLabels);
+    bool showUserDefinedLabels = Config::Get() ->m_showUserDefinedLabels;
 
     // Replace the name of the automatic label maxima has assigned to the output
     // by the one the user has used - if the configuration option to do so is set.
@@ -1170,8 +1165,7 @@ void wxMaxima::ReadPrompt(wxString &data)
 
     if (m_console->m_evaluationQueue->Empty())
     {
-      bool open = false;
-      wxConfig::Get()->Read(wxT("openHCaret"), &open);
+      bool open = Config::Get()->m_openHCaret;
       if (open)
         m_console->OpenNextOrCreateCell();
     }
@@ -1242,8 +1236,7 @@ void wxMaxima::SetCWD(wxString file)
   bool wxcd;
   
 #if defined (__WXMSW__)
-  wxcd = false;
-  wxConfig::Get()->Read(wxT("wxcd"),&wxcd);
+  wxcd = Config::Get()->m_wxcd;
 #else
   wxcd = true;
 #endif
@@ -1511,8 +1504,7 @@ void wxMaxima::ReadLispError(wxString &data)
 
     data = wxEmptyString;
 
-    bool abortOnError = false;
-    wxConfig::Get()->Read(wxT("abortOnError"), &abortOnError);
+    bool abortOnError = Config::Get()->m_abortOnError;
     if(abortOnError || m_batchmode)
       m_console->m_evaluationQueue->Clear();
     SetBatchMode(false);
@@ -1550,9 +1542,8 @@ void wxMaxima::SetupVariables()
   SendMaxima(wxT(":lisp-quiet (setf $in_netmath nil)"));
   SendMaxima(wxT(":lisp-quiet (setf $show_openplot t)"));
   
-  wxConfigBase *config = wxConfig::Get();
   
-  bool wxcd;
+  bool wxcd = Config::Get()->m_wxcd;
 
   #if defined (__WXMSW__)
   wxcd = false;
@@ -1568,21 +1559,13 @@ void wxMaxima::SetupVariables()
     SendMaxima(wxT(":lisp-quiet (defparameter $wxchangedir nil)"));
   }
 
-#if defined (__WXMAC__)
-  bool usepngCairo=false;
-#else
-  bool usepngCairo=true;
-#endif
-  config->Read(wxT("usepngCairo"),&usepngCairo);
-  if(usepngCairo)
+  if(Config::Get()->m_usepngCairo)
     SendMaxima(wxT(":lisp-quiet (defparameter $wxplot_pngcairo t)"));
   else
     SendMaxima(wxT(":lisp-quiet (defparameter $wxplot_pngcairo nil)"));
   
-  int defaultPlotWidth = 600;
-  config->Read(wxT("defaultPlotWidth"), &defaultPlotWidth);
-  int defaultPlotHeight = 400;
-  config->Read(wxT("defaultPlotHeight"), &defaultPlotHeight);
+  int defaultPlotWidth = Config::Get()->m_defaultPlotWidth;
+  int defaultPlotHeight = Config::Get()->m_defaultPlotHeight;
   SendMaxima(wxString::Format(wxT(":lisp-quiet (defparameter $wxplot_size '((mlist simp) %i %i))"),defaultPlotWidth,defaultPlotHeight));
   
 #if defined (__WXMSW__)
@@ -1618,7 +1601,6 @@ void wxMaxima::SetupVariables()
 wxString wxMaxima::GetCommand(bool params)
 {
 #if defined (__WXMSW__)
-  wxConfig *config = (wxConfig *)wxConfig::Get();
   wxString maxima = wxGetCwd();
   wxString parameters;
 
@@ -1629,7 +1611,7 @@ wxString wxMaxima::GetCommand(bool params)
 
   if (!wxFileExists(maxima))
   {
-    config->Read(wxT("maxima"), &maxima);
+    maxima = Config::Get()->m_mc;
     if (!wxFileExists(maxima))
     {
       wxMessageBox(_("wxMaxima could not find Maxima!\n\n"
@@ -1642,7 +1624,7 @@ wxString wxMaxima::GetCommand(bool params)
     }
   }
 
-  config->Read(wxT("parameters"), &parameters);
+  parameters = Config::Get()->m_mp;
   if (params)
     return wxT("\"") + maxima + wxT("\" ") + parameters;
   return maxima;
@@ -1671,8 +1653,7 @@ wxString wxMaxima::GetCommand(bool params)
   if (command.Right(4) == wxT(".app")) // if pointing to a Maxima.app
     command.Append(wxT("/Contents/Resources/maxima.sh"));
 #endif
-
-  config->Read(wxT("parameters"), &parameters);
+  parameters = Config::Get()->m_mp;
   command = wxT("\"") + command + wxT("\" ") + parameters;
   return command;
 #endif

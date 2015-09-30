@@ -21,6 +21,7 @@
 
 #include "SlideShowCell.h"
 #include "ImgCell.h"
+#include "Config.h"
 
 #include <wx/file.h>
 #include <wx/filename.h>
@@ -50,16 +51,10 @@ SlideShow::~SlideShow()
 
 int SlideShow::GetFrameRate()
 {
-  int framerate=2;
+  int framerate = Config::Get()->m_defaultFramerate;
 
   if(m_framerate>-1)
     framerate=m_framerate;
-  else
-    {
-      wxConfigBase *config = wxConfig::Get();
-      
-      config->Read(wxT("DefaultFramerate"),&framerate);
-    }
   return(framerate);
 }
 

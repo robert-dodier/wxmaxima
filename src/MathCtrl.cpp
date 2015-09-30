@@ -32,10 +32,11 @@
 #include "SlideShowCell.h"
 #include "ImgCell.h"
 #include "MarkDown.h"
+#include "Config.h"
 #include "ContentAssistantPopup.h"
 
 #include <wx/clipbrd.h>
-#include <wx/config.h>
+#include "Config.h"
 #include <wx/settings.h>
 #include <wx/filename.h>
 #include <wx/tokenzr.h>
@@ -130,7 +131,6 @@ void MathCtrl::OnPaint(wxPaintEvent& event) {
   wxMemoryDC dcm;
 
   // Get the font size
-  wxConfig *config = (wxConfig *)wxConfig::Get();
 
   // Prepare data
   wxRect rect = GetUpdateRegion().GetBox();
@@ -146,9 +146,7 @@ void MathCtrl::OnPaint(wxPaintEvent& event) {
     m_memory->CreateScaled (sz.x, sz.y, -1, dc.GetContentScaleFactor ());
   }
   // Prepare memory DC
-  wxString bgColStr= wxT("white");
-  config->Read(wxT("Style/Background/color"), &bgColStr);
-  SetBackgroundColour(wxColour(bgColStr));
+  SetBackgroundColour(Config::Get()->m_styleBackground.color);
 
   dcm.SelectObject(*m_memory);
   dcm.SetBackground(*(wxTheBrushList->FindOrCreateBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID)));
@@ -251,9 +249,7 @@ void MathCtrl::OnPaint(wxPaintEvent& event) {
     dcm.SetPen(*(wxThePenList->FindOrCreatePen(parser.GetColor(TS_DEFAULT), 1, wxPENSTYLE_SOLID)));
     dcm.SetBrush(*(wxTheBrushList->FindOrCreateBrush(parser.GetColor(TS_DEFAULT))));
 
-    bool changeAsterisk = false;
-    config->Read(wxT("changeAsterisk"), &changeAsterisk);
-    parser.SetChangeAsterisk(changeAsterisk);
+    parser.SetChangeAsterisk(Config::Get()->m_changeAsterisk);
 
     while (tmp != NULL)
     {
@@ -1945,9 +1941,8 @@ void MathCtrl::OnKeyDown(wxKeyEvent& event) {
     if ((m_activeCell != NULL) && (m_activeCell->GetType() != MC_TYPE_INPUT))
       event.Skip(); // if enter pressed in text, title, section cell, pass the event
     else {
-      bool enterEvaluates = false;
+      bool enterEvaluates = Config::Get()->m_enterEvaluates;
       bool controlOrShift = event.ControlDown() || event.ShiftDown();
-      wxConfig::Get()->Read(wxT("enterEvaluates"), &enterEvaluates);
       if ((!enterEvaluates &&  controlOrShift) ||
           ( enterEvaluates && !controlOrShift) )
       { // shift-enter pressed === menu_evaluate event
@@ -2950,10 +2945,8 @@ bool MathCtrl::ExportToHTML(wxString file) {
   wxString imgDir;
   // What happens if we split the filename into several parts.
   wxString path, filename, ext;
-  wxConfigBase* config= wxConfig::Get();
 
-  bool mathjax = true;
-  config->Read(wxT("exportWithMathJAX"), &mathjax);
+  bool mathjax = Config::Get()->m_exportWithMathJAX;
   
   int count = 0;
   GroupCell *tmp = m_tree;
@@ -3010,94 +3003,56 @@ bool MathCtrl::ExportToHTML(wxString file) {
     output << wxT("</script>") << endl;
   }
   
-  wxString font, fontTitle, fontSection, fontSubsection, fontSubsubsection, fontText;
-  wxString colorInput(wxT("blue"));
-  wxString colorPrompt(wxT("red"));
-  wxString colorText(wxT("black")), colorTitle(wxT("black")), colorSection(wxT("black")),
-    colorSubSec(wxT("black")),colorSubsubSec(wxT("black"));
-  wxString colorCodeVariable = wxT("rgb(0,128,0)");
-  wxString colorCodeFunction = wxT("rgb(128,0,0)");
-  wxString colorCodeComment  = wxT("rgb(64,64,64)");
-  wxString colorCodeNumber   = wxT("rgb(128,64,0)");
-  wxString colorCodeString   = wxT("rgb(0,0,128)");
-  wxString colorCodeOperator = wxT("rgb(0,0,128)");
-  wxString colorCodeEndOfLine = wxT("rgb(192,192,192)");
+  // read fonts
+  wxString font = Config::Get()->m_styleDefault.font;
+  wxString fontTitle = Config::Get()->m_styleTitle.font;
+  wxString fontSection = Config::Get()->m_styleSection.font;
+  wxString fontSubsection = Config::Get()->m_styleSubsection.font;
+  wxString fontSubsubsection = Config::Get()->m_styleSubsubsection.font;
+  wxString fontText = Config::Get()->m_styleText.font;
 
-    
+  // read colors
+  wxString colorInput = Config::Get()->m_styleInput.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorPrompt = Config::Get()->m_styleMainPrompt.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorUserDefinedPrompt = Config::Get()->m_styleUserDefinedLabel.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorText = Config::Get()->m_styleText.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorTitle = Config::Get()->m_styleTitle.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorSection = Config::Get()->m_styleSection.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorSubSec = Config::Get()->m_styleSubsection.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorSubsubSec = Config::Get()->m_styleSubsubsection.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeVariable = Config::Get()->m_styleVariable.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeFunction = Config::Get()->m_styleCodeHighlightingVariable.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeComment = Config::Get()->m_styleCodeHighlightingComment.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeNumber = Config::Get()->m_styleCodeHighlightingNumber.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeString = Config::Get()->m_styleCodeHighlightingString.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeOperator = Config::Get()->m_styleCodeHighlightingOperator.color.GetAsString(wxC2S_CSS_SYNTAX);
+  wxString colorCodeEndOfLine = Config::Get()->m_styleCodeHighlightingEndOfLine.color.GetAsString(wxC2S_CSS_SYNTAX);
+  
   wxString colorTextBg(wxT("white"));
   wxString colorBg(wxT("white"));
 
   // bold and italic
-  bool   boldInput = false;
-  bool italicInput = false;
-  bool   boldPrompt = false;
-  bool italicPrompt = false;
-  bool   boldString = false;
-  bool italicString = false;
+  bool   boldInput = Config::Get()->m_styleInput.bold;
+  bool italicInput = Config::Get()->m_styleInput.italic;
+  bool   boldPrompt = Config::Get()->m_styleMainPrompt.bold;
+  bool italicPrompt = Config::Get()->m_styleMainPrompt.italic;
+  bool   boldString = Config::Get()->m_styleString.bold;
+  bool italicString = Config::Get()->m_styleString.italic;
 
-  bool   boldTitle = false;
-  bool italicTitle = false;
-  bool  underTitle = false;
-  bool   boldSection = false;
-  bool italicSection = false;
-  bool  underSection = false;
-  bool   boldSubsection = false;
-  bool   boldSubsubsection = false;
-  bool italicSubsection = false;
-  bool italicSubsubsection = false;
-  bool  underSubsection = false;
-  bool  underSubsubsection = false;
+  bool   boldTitle = Config::Get()->m_styleTitle.bold;
+  bool italicTitle = Config::Get()->m_styleTitle.italic;
+  bool  underTitle = Config::Get()->m_styleTitle.underlined;
+  bool   boldSection = Config::Get()->m_styleSection.bold;
+  bool italicSection = Config::Get()->m_styleSection.italic;
+  bool  underSection = Config::Get()->m_styleSection.underlined;
+  bool   boldSubsection = Config::Get()->m_styleSubsection.bold;
+  bool   boldSubsubsection = Config::Get()->m_styleSubsubsection.bold;
+  bool italicSubsection = Config::Get()->m_styleSubsection.italic;
+  bool italicSubsubsection = Config::Get()->m_styleSubsubsection.italic;
+  bool  underSubsection = Config::Get()->m_styleSubsection.underlined;
+  bool  underSubsubsection = Config::Get()->m_styleSubsubsection.underlined;
 
-  int fontSize = 12;
-  // main fontsize
-  config->Read(wxT("fontSize"), &fontSize);
-
-  // read fonts
-  config->Read(wxT("Style/fontname"), &font);
-  config->Read(wxT("Style/Title/fontname"), &fontTitle);
-  config->Read(wxT("Style/Section/fontname"), &fontSection);
-  config->Read(wxT("Style/Subsection/fontname"), &fontSubsection);
-  config->Read(wxT("Style/Subsubsection/fontname"), &fontSubsubsection);
-  config->Read(wxT("Style/Text/fontname"), &fontText);
-
-  // read colors
-  config->Read(wxT("Style/Input/color"), &colorInput);
-  config->Read(wxT("Style/MainPrompt/color"), &colorPrompt);
-  config->Read(wxT("Style/Text/color"), &colorText);
-  config->Read(wxT("Style/Section/color"), &colorSection);
-  config->Read(wxT("Style/Subsection/color"), &colorSubSec);
-  config->Read(wxT("Style/Subsubsection/color"), &colorSubsubSec);
-  config->Read(wxT("Style/Title/color"), &colorTitle);
-  config->Read(wxT("Style/TextBackground/color"), &colorTextBg);
-  config->Read(wxT("Style/Background/color"), &colorBg);
-
-  config->Read(wxT("Style/CodeHighlighting/Variable/color"),&colorCodeVariable);
-  config->Read(wxT("Style/CodeHighlighting/Function/color"),&colorCodeFunction);
-  config->Read(wxT("Style/CodeHighlighting/Comment/color"),&colorCodeComment );
-  config->Read(wxT("Style/CodeHighlighting/Number/color"),&colorCodeNumber  );
-  config->Read(wxT("Style/CodeHighlighting/String/color"),&colorCodeString  );
-  config->Read(wxT("Style/CodeHighlighting/Operator/color"),&colorCodeOperator);
-
-  // read bold and italic
-  config->Read(wxT("Style/Input/bold"), &boldInput);
-  config->Read(wxT("Style/String/bold"), &boldString);
-  config->Read(wxT("Style/Input/italic"), &italicInput);
-  config->Read(wxT("Style/String/italic"), &italicString);
-  config->Read(wxT("Style/MainPrompt/bold"), &boldPrompt);
-  config->Read(wxT("Style/MainPrompt/italic"), &italicPrompt);
-
-  config->Read(wxT("Style/Title/bold"),     &boldTitle);
-  config->Read(wxT("Style/Title/italic"), &italicTitle);
-  config->Read(wxT("Style/Title/underlined"), &underTitle);
-  config->Read(wxT("Style/Section/bold"),     &boldSection);
-  config->Read(wxT("Style/Section/italic"), &italicSection);
-  config->Read(wxT("Style/Section/underlined"), &underSection);
-  config->Read(wxT("Style/Subsection/bold"),     &boldSubsection);
-  config->Read(wxT("Style/Subsection/italic"), &italicSubsection);
-  config->Read(wxT("Style/Subsection/underlined"), &underSubsection);
-  config->Read(wxT("Style/Subsubsection/bold"),     &boldSubsubsection);
-  config->Read(wxT("Style/Subsubsection/italic"), &italicSubsubsection);
-  config->Read(wxT("Style/Subsubsection/underlined"), &underSubsubsection);
+  int fontSize = Config::Get()->m_fontSize;
 
   output<<wxT("  <link rel=\"stylesheet\" type=\"text/css\" href=\"")+cssfileName_rel+wxT("\"/>\n");
 
@@ -3396,8 +3351,7 @@ bool MathCtrl::ExportToHTML(wxString file) {
   // Write the actual contents
   //////////////////////////////////////////////
   
-  bool exportInput = true;
-  wxConfig::Get()->Read(wxT("exportInput"), &exportInput);
+  bool exportInput = Config::Get()->m_exportInput;
   
   while (tmp != NULL) {
 
@@ -3493,8 +3447,7 @@ bool MathCtrl::ExportToHTML(wxString file) {
             }
             else
             {
-              int bitmapScale = 3;
-              wxConfig::Get()->Read(wxT("bitmapScale"), &bitmapScale);
+              int bitmapScale = Config::Get()->m_bitmapScale;
               size = CopyToFile(imgDir + wxT("/") + filename + wxString::Format(wxT("_%d."), count) +
                                 dynamic_cast<ImgCell*>(chunk) -> GetExtension(),
                                 chunk,
@@ -3613,8 +3566,7 @@ bool MathCtrl::ExportToHTML(wxString file) {
               ".</SMALL>\n");
   output<<wxEmptyString;
 
-  bool exportContainsWXMX = false;
-  wxConfig::Get()->Read(wxT("exportContainsWXMX"), &exportContainsWXMX);
+  bool exportContainsWXMX = Config::Get()->m_exportContainsWXMX;
 
   if(exportContainsWXMX)
   {
@@ -3853,8 +3805,7 @@ bool MathCtrl::ExportToTeX(wxString file) {
   // Show a busy cursor as long as we export.
   wxBusyCursor crs;
 
-  wxString documentclass = wxT("article");
-  wxConfig::Get()->Read(wxT("documentclass"), &documentclass);
+  wxString documentclass = Config::Get()->m_documentclass;
   
   output<<wxT("\\documentclass{") +
     documentclass +
@@ -3910,8 +3861,7 @@ bool MathCtrl::ExportToTeX(wxString file) {
   
   // The animate package is only needed if we actually want to output animations
   // to LaTeX. Don't drag in this dependency if this feature was disabled in the settings.
-  bool AnimateLaTeX=true;
-  wxConfig::Get()->Read(wxT("AnimateLaTeX"), &AnimateLaTeX);
+  bool AnimateLaTeX=Config::Get()->m_animateLaTeX;
   if(AnimateLaTeX)
   {
     output<<wxT("\\usepackage{animate} % This package is required because the wxMaxima configuration option\n");
@@ -3922,8 +3872,7 @@ bool MathCtrl::ExportToTeX(wxString file) {
   output<<wxT("\n");
                 
   // Add an eventual preamble requested by the user.
-  wxString texPreamble;
-  wxConfig::Get()->Read(wxT("texPreamble"), &texPreamble);
+  wxString texPreamble = Config::Get()->m_texPreamble;
   if(texPreamble!=wxEmptyString)
     output << texPreamble<<wxT("\n\n");
 
@@ -4102,7 +4051,7 @@ bool MathCtrl::ExportToMAC(wxString file)
     AddLineToFile(backupfile, wxT("/* [ Created with wxMaxima version ") + version + wxT(" ] */"), false);
   }
 
-  bool fixReorderedIndices;  wxConfig::Get()->Read(wxT("fixReorderedIndices"), &fixReorderedIndices);
+  bool fixReorderedIndices = Config::Get()->m_fixReorderedIndices;
   std::vector<int> cellMap;
   if (fixReorderedIndices) {
     int cellIndex = 1;
@@ -4200,7 +4149,6 @@ bool MathCtrl::ExportToWXMX(wxString file,bool markAsSaved)
      - content.xml typically is small and therefore won't get much smaller during
      compression.
   */
-  bool VcFriendlyWXMX=true;
 
   // next zip entry is "content.xml", xml of m_tree
 
@@ -4287,7 +4235,7 @@ bool MathCtrl::ExportToWXMX(wxString file,bool markAsSaved)
   if(m_tree!=NULL)output << xmlText;
   output << wxT("\n</wxMaximaDocument>");
 
-  wxConfig::Get()->Read(wxT("OptimizeForVersionControl"), &VcFriendlyWXMX);
+  bool VcFriendlyWXMX = Config::Get()->m_vcFriendlyWXMX;
   if(!VcFriendlyWXMX)
     zip.SetLevel(9);
   
@@ -4623,9 +4571,7 @@ void MathCtrl::Undo()
 void MathCtrl::TreeUndo_LimitUndoBuffer()
 {
   
-  wxConfigBase *config = wxConfig::Get();
-  int undoLimit;
-  config->Read(wxT("undoLimit"),&undoLimit);
+  int undoLimit = Config::Get()->m_undoLimit;
 
   if(undoLimit == 0)
     return;
@@ -4874,8 +4820,8 @@ void MathCtrl::SetActiveCell(EditorCell *cell, bool callRefresh) {
     bool insertAns = false;
     if (m_activeCell->GetType() == MC_TYPE_INPUT)
     {
-      wxConfig::Get()->Read(wxT("matchParens"), &match);
-      wxConfig::Get()->Read(wxT("insertAns"), &insertAns);
+      match = Config::Get()->m_matchParens;
+      insertAns = Config::Get()->m_insertAns;
     }
     m_activeCell->ActivateCell();
     m_activeCell->SetMatchParens(match);

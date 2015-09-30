@@ -19,6 +19,7 @@
 //
 
 #include "MarkDown.h"
+#include "Config.h"
 
 MarkDownParser::~MarkDownParser()
 {
@@ -31,8 +32,7 @@ MarkDownParser::~MarkDownParser()
 
 MarkDownParser :: MarkDownParser()
 {
-  m_flowedTextRequested = true;
-  wxConfig::Get()->Read(wxT("flowedTextRequested"), &m_flowedTextRequested);
+  m_flowedTextRequested = Config::Get()->m_flowedTextRequested;
 }
   
 wxString MarkDownParser::MarkDown(wxString str)

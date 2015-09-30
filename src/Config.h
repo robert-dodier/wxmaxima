@@ -69,7 +69,7 @@ public:
   bool m_enterEvaluates;
   bool m_saveUntitled;
   bool m_openHCaret;
-  bool m_AnimateLaTeX;
+  bool m_animateLaTeX;
   bool m_TeXExponentsAfterSubscript;
   bool m_flowedTextRequested;
   bool m_exportInput;
@@ -79,7 +79,8 @@ public:
   bool m_fixReorderedIndices;
   bool m_showUserDefinedLabels;
   bool m_usepngCairo;
-
+  bool m_vcFriendlyWXMX;
+  bool m_wxcd;
   wxString m_texPreamble;
   wxString m_documentclass;
 

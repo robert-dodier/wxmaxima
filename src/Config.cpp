@@ -84,7 +84,7 @@ void Config::RevertToDefault()
   m_enterEvaluates = false;
   m_saveUntitled = true;
   m_openHCaret = false;
-  m_AnimateLaTeX = true;
+  m_animateLaTeX = true;
   m_TeXExponentsAfterSubscript=false;
   m_flowedTextRequested = true;
   m_exportInput = true;
@@ -98,7 +98,8 @@ void Config::RevertToDefault()
 # else
   m_usepngCairo=true;
 # endif
-
+  m_vcFriendlyWXMX = true;
+  m_wxcd = true;
   
   m_labelWidth = 4;
   m_undoLimit = 0;
@@ -272,12 +273,14 @@ void Config::Read()
   m_config->Read(wxT("parameters"), &m_mc);
   m_config->Read(wxT("AUI/savePanes"), &m_savePanes);
   m_config->Read(wxT("usepngCairo"), &m_usepngCairo);
+  m_config->Read(wxT("OptimizeForVersionControl"), &m_vcFriendlyWXMX);
   m_config->Read(wxT("DefaultFramerate"), &m_defaultFramerate);
   m_config->Read(wxT("defaultPlotWidth"), &m_defaultPlotWidth);
   m_config->Read(wxT("defaultPlotHeight"), &m_defaultPlotHeight);
   m_config->Read(wxT("displayedDigits"), &m_displayedDigits);
+  if (m_displayedDigits<10)m_displayedDigits=10;
   m_config->Read(wxT("OptimizeForVersionControl"), &m_uncompressedWXMX);
-  m_config->Read(wxT("AnimateLaTeX"), &m_AnimateLaTeX);
+  m_config->Read(wxT("AnimateLaTeX"), &m_animateLaTeX);
   m_config->Read(wxT("TeXExponentsAfterSubscript"), &m_TeXExponentsAfterSubscript);
   m_config->Read(wxT("flowedTextRequested"), &m_flowedTextRequested);
   m_config->Read(wxT("exportInput"), &m_exportInput);
@@ -307,6 +310,7 @@ void Config::Read()
   m_config->Read(wxT("keepPercent"), &m_keepPercent);
   m_config->Read(wxT("abortOnError"), &m_abortOnError);
   m_config->Read(wxT("pollStdOut"), &m_pollStdOut);
+  m_config->Read(wxT("wxcd"), &m_wxcd);
   m_config->Read(wxT("fontsize"), &m_fontSize);
   m_config->Read(wxT("mathfontsize"), &m_mathFontSize);
   m_config->Read(wxT("fontEncoding"), &m_fontEncoding);
@@ -418,12 +422,13 @@ void Config::Write()
   #endif
   m_config->Write(wxT("AUI/savePanes"), m_savePanes);
   m_config->Write(wxT("usepngCairo"), m_usepngCairo);
+  m_config->Write(wxT("OptimizeForVersionControl"), m_vcFriendlyWXMX);
   m_config->Write(wxT("OptimizeForVersionControl"), m_uncompressedWXMX);
   m_config->Write(wxT("DefaultFramerate"), m_defaultFramerate);
   m_config->Write(wxT("defaultPlotWidth"), m_defaultPlotWidth);
   m_config->Write(wxT("defaultPlotHeight"), m_defaultPlotHeight);
   m_config->Write(wxT("displayedDigits"), m_displayedDigits);
-  m_config->Write(wxT("AnimateLaTeX"), m_AnimateLaTeX);
+  m_config->Write(wxT("AnimateLaTeX"), m_animateLaTeX);
   m_config->Write(wxT("TeXExponentsAfterSubscript"), m_TeXExponentsAfterSubscript);
   m_config->Write(wxT("flowedTextRequested"), m_flowedTextRequested);
   m_config->Write(wxT("exportInput"), m_exportInput);

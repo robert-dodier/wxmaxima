@@ -21,7 +21,7 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include <wx/config.h>
+#include "Config.h"
 #include <wx/clipbrd.h>
 #include "MarkDown.h"
 #include "GroupCell.h"
@@ -63,10 +63,8 @@ GroupCell::GroupCell(int groupType, wxString initString) : MathCell()
     m_input->SetType(MC_TYPE_MAIN_PROMPT);
   }
 
-  bool match = true;
-  bool insertAns = false;
-  wxConfig::Get()->Read(wxT("matchParens"), &match);
-  wxConfig::Get()->Read(wxT("insertAns"), &insertAns);
+  bool match = Config::Get()->m_matchParens;
+  bool insertAns = Config::Get()->m_insertAns;
   EditorCell *editor = new EditorCell();
   editor->SetMatchParens(match);
   editor->SetInsertAns(insertAns);
@@ -699,8 +697,7 @@ wxString GroupCell::ToTeX(wxString imgDir, wxString filename, int *imgCounter)
   // Now we might want to introduce some markdown:
   MarkDownTeX MarkDownParser;
 
-  bool exportInput = true;
-  wxConfig::Get()->Read(wxT("exportInput"), &exportInput);
+  bool exportInput = Config::Get()->m_exportInput;
 
   // pagebreak
   if (m_groupType == GC_TYPE_PAGEBREAK) {
@@ -784,8 +781,7 @@ wxString GroupCell::ToTeX(wxString imgDir, wxString filename, int *imgCounter)
                 continue;
 	    
 	    // Do we want to output LaTeX animations?
-	    bool AnimateLaTeX=true;
-	    wxConfig::Get()->Read(wxT("AnimateLaTeX"), &AnimateLaTeX);
+	    bool AnimateLaTeX=Config::Get()->m_animateLaTeX;
 	    if((tmp->GetType() == MC_TYPE_SLIDE)&&(AnimateLaTeX))
             {
               SlideShow* src=(SlideShow *)tmp;

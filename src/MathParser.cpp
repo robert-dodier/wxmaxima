@@ -19,7 +19,7 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include <wx/config.h>
+#include "Config.h"
 #include <wx/tokenzr.h>
 #include <wx/sstream.h>
 #include <wx/regex.h>
@@ -401,11 +401,8 @@ MathCell* MathParser::ParseText(wxXmlNode* node, int style)
 #endif
     if (style == TS_NUMBER)
     {
-      m_displayedDigits=100;
-      wxConfigBase *config = wxConfig::Get();      
-      config->Read(wxT("displayedDigits"),&m_displayedDigits);
+      m_displayedDigits = Config::Get()->m_displayedDigits;
 
-      if (m_displayedDigits<10)m_displayedDigits=10;
       if (str.Length() > m_displayedDigits)
 	{
 	  int left= m_displayedDigits/3;
@@ -1001,9 +998,7 @@ MathCell* MathParser::ParseLine(wxString s, int style)
   m_highlight = false;
   MathCell* cell = NULL;
 
-  wxConfigBase* config = wxConfig::Get();
-  int showLength = 0;
-  config->Read(wxT("showLength"), &showLength);
+  int showLength = Config::Get()->m_showLength;
 
   switch(showLength)
   {

@@ -21,7 +21,7 @@
 #include "MathPrintout.h"
 #include "GroupCell.h"
 
-#include <wx/config.h>
+#include "Config.h"
 
 #define PRINT_MARGIN_HORIZONTAL 5
 #define PRINT_MARGIN_VERTICAL 5
@@ -83,11 +83,8 @@ bool MathPrintout::OnPrintPage(int num)
     wxPoint point;
     point.x = marginX;
     point.y = marginY + tmp->GetMaxCenter() + GetHeaderHeight();
-    wxConfigBase* config = wxConfig::Get();
-    int fontsize = 12;
+    int fontsize = Config::Get()->m_fontSize;
     int drop = tmp->GetMaxDrop();
-
-    config->Read(wxT("fontsize"), &fontsize);
 
     PrintHeader(num, dc, ppiScale);
     CellParser parser(*dc, ppiScale);
@@ -229,11 +226,8 @@ void MathPrintout::PrintHeader(int pageNum, wxDC* dc, double scale)
 
 void MathPrintout::Recalculate()
 {
-  wxConfig *config = (wxConfig *)wxConfig::Get();
-  int fontsize = 12;
-  config->Read(wxT("fontSize"), &fontsize);
-  int mfontsize = fontsize;
-  config->Read(wxT("mathfontsize"), &mfontsize);
+  int fontsize = Config::Get()->m_fontSize;
+  int mfontsize = Config::Get()->m_mathFontSize;
   GroupCell* tmp = (GroupCell *)m_tree;
   double scale = GetPPIScale();
 

@@ -19,6 +19,7 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
+#include "Config.h"
 #include "TextCell.h"
 #include "Setup.h"
 #include "wx/config.h"
@@ -76,9 +77,7 @@ wxString TextCell::LabelWidthText()
 {
   wxString result;
 
-  wxConfig *config = (wxConfig *)wxConfig::Get();
-  int labelWidth = 4;
-  config->Read(wxT("labelWidth"), &labelWidth);
+  int labelWidth = Config::Get()->m_labelWidth;
 
   for(int i=0;i<labelWidth;i++)
     result += wxT("X");

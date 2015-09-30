@@ -67,8 +67,7 @@ CellParser::CellParser(wxDC& dc, double scale) : m_dc(dc)
       wxFontEnumerator::IsValidFacename(m_fontCMTI = wxT("jsMath-cmti10")))
     m_TeXFonts = Config::Get()->m_usejsmath;
 
-  m_keepPercent = true;
-  wxConfig::Get()->Read(wxT("keepPercent"), &m_keepPercent);
+  m_keepPercent = Config::Get()->m_keepPercent;
 
   ReadStyle();
 }
