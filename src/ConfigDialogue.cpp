@@ -696,55 +696,52 @@ void ConfigDialogue::WriteSettings()
   int i = 0;
   wxString search = wxT("maxima-htmldir");
   wxArrayString out;
-  bool abortOnError = m_abortOnError->GetValue();
-  bool pollStdOut   = m_pollStdOut->GetValue();
-  wxString maxima = m_maximaProgram->GetValue();
-  wxConfig *config = (wxConfig *)wxConfig::Get();
-  config->Write(wxT("abortOnError"), m_abortOnError->GetValue());
-  config->Write(wxT("pollStdOut"), m_pollStdOut->GetValue());
-  config->Write(wxT("maxima"), m_maximaProgram->GetValue());
-  config->Write(wxT("parameters"), m_additionalParameters->GetValue());
-  config->Write(wxT("fontSize"), m_fontSize);
-  config->Write(wxT("mathFontsize"), m_mathFontSize);
-  config->Write(wxT("matchParens"), m_matchParens->GetValue());
-  config->Write(wxT("showLength"), m_showLength->GetSelection());
-  config->Write(wxT("fixedFontTC"), m_fixedFontInTC->GetValue());
-  config->Write(wxT("changeAsterisk"), m_changeAsterisk->GetValue());
-  config->Write(wxT("enterEvaluates"), m_enterEvaluates->GetValue());
-  config->Write(wxT("saveUntitled"), m_saveUntitled->GetValue());
-  config->Write(wxT("openHCaret"), m_openHCaret->GetValue());
-  config->Write(wxT("insertAns"), m_insertAns->GetValue());
-  config->Write(wxT("labelWidth"), m_labelWidth->GetValue());
-  config->Write(wxT("undoLimit"), m_undoLimit->GetValue());
-  config->Write(wxT("bitmapScale"), m_bitmapScale->GetValue());
-  config->Write(wxT("fixReorderedIndices"), m_fixReorderedIndices->GetValue());
-  config->Write(wxT("showUserDefinedLabels"), m_showUserDefinedLabels->GetValue());
-  config->Write(wxT("defaultPort"), m_defaultPort->GetValue());
+  Config *config = Config::Get();
+  config::m_abortOnError = m_abortOnError->GetValue());
+  config::m_pollStdOut = m_pollStdOut->GetValue());
+  config::m_maxima = m_maximaProgram->GetValue());
+  config::m_parameters = m_additionalParameters->GetValue());
+  config::m_fontSize = m_fontSize);
+  config::m_mathFontsize = m_mathFontSize);
+  config::m_matchParens = m_matchParens->GetValue());
+  config::m_showLength = m_showLength->GetSelection());
+  config::m_fixedFontTC = m_fixedFontInTC->GetValue());
+  config::m_changeAsterisk = m_changeAsterisk->GetValue());
+  config::m_enterEvaluates = m_enterEvaluates->GetValue());
+  config::m_saveUntitled = m_saveUntitled->GetValue());
+  config::m_openHCaret = m_openHCaret->GetValue());
+  config::m_insertAns = m_insertAns->GetValue());
+  config::m_labelWidth = m_labelWidth->GetValue());
+  config::m_undoLimit = m_undoLimit->GetValue());
+  config::m_bitmapScale = m_bitmapScale->GetValue());
+  config::m_fixReorderedIndices = m_fixReorderedIndices->GetValue());
+  config::m_showUserDefinedLabels = m_showUserDefinedLabels->GetValue());
+  config::m_defaultPort = m_defaultPort->GetValue());
   #ifdef __WXMSW__
-  config->Write(wxT("wxcd"), m_wxcd->GetValue());
+  config::m_wxcd = m_wxcd->GetValue());
   #endif
-  config->Write(wxT("AUI/savePanes"), m_savePanes->GetValue());
-  config->Write(wxT("usepngCairo"), m_usepngCairo->GetValue());
-  config->Write(wxT("OptimizeForVersionControl"), m_uncomressedWXMX->GetValue());
-  config->Write(wxT("DefaultFramerate"), m_defaultFramerate->GetValue());
-  config->Write(wxT("defaultPlotWidth"), m_defaultPlotWidth->GetValue());
-  config->Write(wxT("defaultPlotHeight"), m_defaultPlotHeight->GetValue());
-  config->Write(wxT("displayedDigits"), m_displayedDigits->GetValue());
-  config->Write(wxT("AnimateLaTeX"), m_AnimateLaTeX->GetValue());
-  config->Write(wxT("TeXExponentsAfterSubscript"), m_TeXExponentsAfterSubscript->GetValue());
-  config->Write(wxT("flowedTextRequested"), m_flowedTextRequested->GetValue());
-  config->Write(wxT("exportInput"), m_exportInput->GetValue());
-  config->Write(wxT("exportContainsWXMX"), m_exportContainsWXMX->GetValue());
-  config->Write(wxT("exportWithMathJAX"), m_exportWithMathJAX->GetValue());
-  config->Write(wxT("usejsmath"), m_useJSMath->GetValue());
-  config->Write(wxT("keepPercent"), m_keepPercentWithSpecials->GetValue());
-  config->Write(wxT("texPreamble"), m_texPreamble->GetValue());
-  config->Write(wxT("autoSaveInterval"), m_autoSaveInterval->GetValue());
-  config->Write(wxT("documentclass"), m_documentclass->GetValue());
+  config::m_AUI/savePanes = m_savePanes->GetValue());
+  config::m_usepngCairo = m_usepngCairo->GetValue());
+  config::m_OptimizeForVersionControl = m_uncomressedWXMX->GetValue());
+  config::m_DefaultFramerate = m_defaultFramerate->GetValue());
+  config::m_defaultPlotWidth = m_defaultPlotWidth->GetValue());
+  config::m_defaultPlotHeight = m_defaultPlotHeight->GetValue());
+  config::m_displayedDigits = m_displayedDigits->GetValue());
+  config::m_AnimateLaTeX = m_AnimateLaTeX->GetValue());
+  config::m_TeXExponentsAfterSubscript = m_TeXExponentsAfterSubscript->GetValue());
+  config::m_flowedTextRequested = m_flowedTextRequested->GetValue());
+  config::m_exportInput = m_exportInput->GetValue());
+  config::m_exportContainsWXMX = m_exportContainsWXMX->GetValue());
+  config::m_exportWithMathJAX = m_exportWithMathJAX->GetValue());
+  config::m_usejsmath = m_useJSMath->GetValue());
+  config::m_keepPercent = m_keepPercentWithSpecials->GetValue());
+  config::m_texPreamble = m_texPreamble->GetValue());
+  config::m_autoSaveInterval = m_autoSaveInterval->GetValue());
+  config::m_documentclass = m_documentclass->GetValue());
   if (m_saveSize->GetValue())
-    config->Write(wxT("pos-restore"), 1);
+    config::m_saveSize = 1;
   else
-    config->Write(wxT("pos-restore"), 0);
+    config::m_saveSize = 0;
   i = m_language->GetSelection();
   if (i > -1 && i < LANGUAGE_NUMBER)
     config->Write(wxT("language"), langs[i]);
@@ -1170,10 +1167,10 @@ void ConfigDialogue::WriteStyles(wxString file)
   config->Write(wxT("Style/Outdated/color"),
                 m_styleOutdated.color.GetAsString(wxC2S_CSS_SYNTAX));
 
-  config->Write(wxT("Style/fontname"), m_styleDefault.font);
+  config::Style/fontname") = m_styleDefault.font);
   config->Write(wxT("fontEncoding"), (int)m_fontEncoding);
 
-  config->Write(wxT("Style/Math/fontname"), m_mathFontName);
+  config::Style/Math/fontname") = m_mathFontName);
 
 #define WRITE_STYLE(style, where)                                       \
   config->Write(wxT(where "color"), style.color.GetAsString(wxC2S_CSS_SYNTAX)); \
@@ -1215,8 +1212,8 @@ void ConfigDialogue::WriteStyles(wxString file)
   WRITE_STYLE(m_styleVariable, "Style/Variable/")
 
   // Text
-  config->Write(wxT("Style/Text/fontname"), m_styleText.font);
-  config->Write(wxT("Style/Text/fontsize"), m_styleText.fontSize);
+  config::Style/Text/fontname") = m_styleText.font);
+  config::Style/Text/fontsize") = m_styleText.fontSize);
   WRITE_STYLE(m_styleText, "Style/Text/")
 
   // Syntax highlighting
@@ -1229,23 +1226,23 @@ void ConfigDialogue::WriteStyles(wxString file)
   WRITE_STYLE(m_styleCodeHighlightingEndOfLine,"Style/CodeHighlighting/EndOfLine/")
 
   // Subsubsection
-  config->Write(wxT("Style/Subsubsection/fontname"), m_styleSubsubsection.font);
-  config->Write(wxT("Style/Subsubsection/fontsize"), m_styleSubsubsection.fontSize);
+  config::Style/Subsubsection/fontname") = m_styleSubsubsection.font);
+  config::Style/Subsubsection/fontsize") = m_styleSubsubsection.fontSize);
   WRITE_STYLE(m_styleSubsubsection, "Style/Subsubsection/")
 
   // Subsection
-  config->Write(wxT("Style/Subsection/fontname"), m_styleSubsection.font);
-  config->Write(wxT("Style/Subsection/fontsize"), m_styleSubsection.fontSize);
+  config::Style/Subsection/fontname") = m_styleSubsection.font);
+  config::Style/Subsection/fontsize") = m_styleSubsection.fontSize);
   WRITE_STYLE(m_styleSubsection, "Style/Subsection/")
 
   // Section
-  config->Write(wxT("Style/Section/fontname"), m_styleSection.font);
-  config->Write(wxT("Style/Section/fontsize"), m_styleSection.fontSize);
+  config::Style/Section/fontname") = m_styleSection.font);
+  config::Style/Section/fontsize") = m_styleSection.fontSize);
   WRITE_STYLE(m_styleSection, "Style/Section/")
 
   // Title
-  config->Write(wxT("Style/Title/fontname"), m_styleTitle.font);
-  config->Write(wxT("Style/Title/fontsize"), m_styleTitle.fontSize);
+  config::Style/Title/fontname") = m_styleTitle.font);
+  config::Style/Title/fontsize") = m_styleTitle.fontSize);
   WRITE_STYLE(m_styleTitle, "Style/Title/")
 
   // Function names
