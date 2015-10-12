@@ -347,6 +347,10 @@ private:
   void OnMouseMiddleUp(wxMouseEvent& event);
   void NumberSections();
   bool IsLesserGCType(int type, int comparedTo);
+  //! Finds the start of the current chapter/section/...
+  GroupCell *StartOfSectioningUnit(GroupCell *start);
+  //! Finds the end of the current chapter/section/...
+  GroupCell *EndOfSectioningUnit(GroupCell *start);
   //! Is called if a action from the autocomplete menu is selected
   void OnComplete(wxCommandEvent &event);
   wxPoint m_down;
@@ -485,6 +489,7 @@ public:
     popid_animation_save,
     popid_animation_start,
     popid_evaluate,
+    popid_evaluate_section,
     popid_merge_cells,
     popid_insert_text,
     popid_insert_title,
@@ -765,8 +770,12 @@ public:
   void AddEntireDocumentToEvaluationQueue();
   //! Schedule all cells stopping with the one the caret is in for evaluation
   void AddDocumentTillHereToEvaluationQueue();
-  //! Schedule all selected cells to be evaluated
+  //! Adds a chapter, a section or a subsection to the evaluation queue
+  void AddSectionToEvaluationQueue(GroupCell *start);
+  //! Schedule all cells in the selection to be evaluated
   void AddSelectionToEvaluationQueue();
+  //! Schedule all cells in a region to be evaluated  
+  void AddSelectionToEvaluationQueue(GroupCell *start,GroupCell *end);
   //! Schedule this cell for evaluation
   void AddCellToEvaluationQueue(GroupCell* gc);
   //! The list of cells that have to be evaluated

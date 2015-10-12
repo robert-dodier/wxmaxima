@@ -61,28 +61,15 @@ wxMaximaFrame::wxMaximaFrame(wxWindow* parent, int id, const wxString& title,
   StatusMaximaBusy(waiting);
 
   // Add some shortcuts that aren't automatically set by menu entries.
-#if defined __WXMSW__
-  wxAcceleratorEntry entries[7];
+  wxAcceleratorEntry entries[6];
   entries[0].Set(wxACCEL_CTRL,  WXK_TAB,    menu_autocomplete);
   entries[1].Set(wxACCEL_CTRL,  WXK_SPACE,  menu_autocomplete);
   entries[2].Set(wxACCEL_CTRL|wxACCEL_SHIFT,  WXK_TAB,    menu_autocomplete_templates);
   entries[3].Set(wxACCEL_CTRL|wxACCEL_SHIFT,  WXK_SPACE,  menu_autocomplete_templates);
   entries[4].Set(wxACCEL_ALT,  wxT('I'),   MathCtrl::menu_zoom_in);
   entries[5].Set(wxACCEL_ALT,  wxT('O'),   MathCtrl::menu_zoom_out);
-  entries[6].Set(wxACCEL_CTRL,  WXK_RETURN, menu_evaluate);
-  wxAcceleratorTable accel(7, entries);
-  SetAcceleratorTable(accel);
-#else
-  wxAcceleratorEntry entries[6];
-  entries[0].Set(wxACCEL_CTRL,  WXK_TAB, menu_autocomplete);
-  entries[1].Set(wxACCEL_CTRL,  WXK_SPACE, menu_autocomplete);
-  entries[2].Set(wxACCEL_CTRL|wxACCEL_SHIFT,  WXK_TAB,    menu_autocomplete_templates);
-  entries[3].Set(wxACCEL_CTRL|wxACCEL_SHIFT,  WXK_SPACE,  menu_autocomplete_templates);
-  entries[4].Set(wxACCEL_ALT,  wxT('I'), MathCtrl::menu_zoom_in);
-  entries[5].Set(wxACCEL_ALT,  wxT('O'), MathCtrl::menu_zoom_out);
   wxAcceleratorTable accel(6, entries);
   SetAcceleratorTable(accel);
-#endif
 
   set_properties();
   do_layout();
@@ -464,7 +451,7 @@ void wxMaximaFrame::SetupMenu()
 
   // panes
   m_Maxima_Panes_Sub = new wxMenu;
-  m_Maxima_Panes_Sub->Append(menu_pane_hideall, _("Hide All Toolbars\tAlt-Shift--"), _("Hide all panes"), wxITEM_NORMAL);
+  m_Maxima_Panes_Sub->AppendCheckItem(menu_show_toolbar, _("Main Toolbar\tAlt-Shift-B"));
   m_Maxima_Panes_Sub->AppendSeparator();
   m_Maxima_Panes_Sub->AppendCheckItem(menu_pane_math, _("General Math\tAlt-Shift-M"));
   m_Maxima_Panes_Sub->AppendCheckItem(menu_pane_stats, _("Statistics\tAlt-Shift-S"));
@@ -473,7 +460,7 @@ void wxMaximaFrame::SetupMenu()
   m_Maxima_Panes_Sub->AppendCheckItem(menu_pane_xmlInspector,  _("XML Inspector"));
   m_Maxima_Panes_Sub->AppendCheckItem(menu_pane_format, _("Insert Cell\tAlt-Shift-C"));
   m_Maxima_Panes_Sub->AppendSeparator();
-  m_Maxima_Panes_Sub->AppendCheckItem(menu_show_toolbar, _("Toolbar\tAlt-Shift-B"));
+  m_Maxima_Panes_Sub->Append(menu_pane_hideall, _("Hide All Toolbars\tAlt-Shift--"), _("Hide all panes"), wxITEM_NORMAL);
   m_Maxima_Panes_Sub->AppendSeparator();
   APPEND_MENU_ITEM(m_Maxima_Panes_Sub, MathCtrl::menu_zoom_in, _("Zoom &In\tCtrl-+"),
                    _("Zoom in 10%"), wxT("gtk-zoom-in"));

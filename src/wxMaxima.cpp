@@ -501,8 +501,9 @@ void wxMaxima::SendMaxima(wxString s, bool addToHistory)
   s.Replace(wxT("\x21D2"), wxT(" implies "));
   s.Replace(wxT("\x21D4"), wxT(" equiv "));
   s.Replace(wxT("\x00AC"), wxT(" not "));
+  s.Replace(wxT("\x2260"), wxT(" # "));
   s.Replace(wxT("\x2212"), wxT("-")); // An unicode minus sign
-  s.Replace(wxT("\xDCB6"), wxT(" ")); // Some weird unicode space character
+  s.Replace(wxT("\xDCB6"), wxT(" ")); // A non-breakable space
 
 #endif
 
@@ -717,6 +718,7 @@ void wxMaxima::ServerEvent(wxSocketEvent& event)
 #ifndef __WXMSW__
     ReadProcessOutput();
 #endif
+    SetupVariables();
   }
   break;
 
@@ -1097,7 +1099,10 @@ void wxMaxima::ReadPrompt(wxString &data)
   if (end == wxNOT_FOUND)
     return;
 
-  wxASSERT_MSG(begin != wxNOT_FOUND,_("bug: Input prompt end detected but didn't detect an input prompt begin!"));
+  // This assert was automatically triggered after a to_lisp() so I commented
+  // it out.
+  //
+  //wxASSERT_MSG(begin != wxNOT_FOUND,_("bug: Input prompt end detected but didn't detect an input prompt begin!"));
 
   wxString o;
 
@@ -2774,6 +2779,12 @@ void wxMaxima::EditMenu(wxCommandEvent& event)
     }
     else
     {
+      if(m_console->GetActiveCell()!=NULL)
+      {
+        wxString selected = m_console->GetActiveCell()->GetSelectionString();
+        if(selected.Length()>0)
+          m_findData.SetFindString(selected);
+      }
       m_findDialog = new wxFindReplaceDialog(
         this,
         &m_findData,
@@ -4510,6 +4521,34 @@ void wxMaxima::PopupMenu(wxCommandEvent& event)
   wxString selection = m_console->GetString();
   switch (event.GetId())
   {
+  case MathCtrl::popid_evaluate_section:
+  {
+    bool evaluating = !m_console->m_evaluationQueue->Empty();
+    GroupCell *group = NULL;
+    if(m_console->GetActiveCell())
+    {
+      // This "if" is pure paranoia. But - since the costs of an "if" are low...
+      if(m_console->GetActiveCell()->GetParent())
+        group = dynamic_cast<GroupCell*>(m_console->GetActiveCell()->GetParent());
+    }
+    else if(m_console->HCaretActive())
+    {
+      if(m_console->GetHCaret())
+      {
+        group = m_console->GetHCaret();
+/*        if(group->m_next)
+          group = dynamic_cast<GroupCell*>(group->m_next);*/
+      }
+      else
+        group = m_console->GetTree();
+    }
+    if(group)
+    {
+      m_console->AddSectionToEvaluationQueue(group);
+      if(!evaluating) TryEvaluateNextInQueue();
+    }
+  }
+  break;
   case MathCtrl::popid_copy:
     if (m_console->CanCopy(true))
       m_console->Copy();
@@ -4689,13 +4728,6 @@ void wxMaxima::PopupMenu(wxCommandEvent& event)
     }
   }
   break;
-  case MathCtrl::popid_evaluate:
-  {
-    bool evaluating = !m_console->m_evaluationQueue->Empty();
-    m_console->AddSelectionToEvaluationQueue();
-    if(!evaluating) TryEvaluateNextInQueue();
-  }
-  break;
   case MathCtrl::popid_merge_cells:
     m_console->MergeCells();
     break;
@@ -4797,6 +4829,7 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
 
   bool lisp = false;
 
+  wxChar lastC=wxT(';');
   while(index<len)
   {
     wxChar c=text[index];
@@ -4805,12 +4838,15 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
     {
     case wxT('('):
       delimiters.push_back(wxT(')'));
+      lastC=c;
       break;
     case wxT('['):
       delimiters.push_back(wxT(']'));
+      lastC=c;
       break;
     case wxT('{'):
       delimiters.push_back(wxT('}'));
+      lastC=c;
       break;
 
     case wxT(')'):
@@ -4818,10 +4854,12 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
     case wxT('}'):
       if(c!=delimiters.back()) return(_("Mismatched parenthesis"));
       delimiters.pop_back();
+      lastC=c;
       break;
 
     case wxT('\\'):
       index++;
+      lastC=c;
       break;
 
     case wxT('\"'):
@@ -4833,11 +4871,13 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
         index++;
       }
       if(text[index]!=wxT('\"')) return(_("Unterminated string."));
+      lastC=c;
       break;
 
     case wxT(':'):
       if(text.find(wxT("lisp"),index + 1) == index + 1)
         lisp = true;
+      lastC=c;
       break;
       
     case wxT(';'):
@@ -4846,6 +4886,7 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
       {
         return _("Un-closed parenthesis on encountering ; or $");
       }
+      lastC=c;
       break;      
       
     case wxT('/'):
@@ -4857,7 +4898,11 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
           if(index==wxNOT_FOUND)
             return(_("Unterminated comment."));
         }
+        else lastC=c;
       }
+    default:
+      if((c!=wxT('\n')) && (c!=wxT(' '))&& (c!=wxT('\t')))
+        lastC=c;
     }
 
     index++;
@@ -4865,6 +4910,12 @@ wxString wxMaxima::GetUnmatchedParenthesisState(wxString text)
   if(!delimiters.empty())
   {
     return _("Un-closed parenthesis");
+  }
+
+  if((!lisp))
+  {
+    if((lastC!=wxT(';'))&&(lastC!=wxT('$')))
+      return _("No dollar ($) or semicolon (;) at the end of command");      
   }
   return wxEmptyString;
 }
@@ -5626,6 +5677,7 @@ EVT_MENU(MathCtrl::popid_select_all, wxMaxima::PopupMenu)
 EVT_MENU(MathCtrl::popid_comment_selection, wxMaxima::PopupMenu)
 EVT_MENU(MathCtrl::popid_divide_cell, wxMaxima::PopupMenu)
 EVT_MENU(MathCtrl::popid_evaluate, wxMaxima::PopupMenu)
+EVT_MENU(MathCtrl::popid_evaluate_section, wxMaxima::PopupMenu)
 EVT_MENU(MathCtrl::popid_merge_cells, wxMaxima::PopupMenu)
 EVT_MENU(menu_evaluate_all_visible, wxMaxima::MaximaMenu)
 EVT_MENU(menu_evaluate_all, wxMaxima::MaximaMenu)

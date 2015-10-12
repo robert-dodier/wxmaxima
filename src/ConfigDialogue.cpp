@@ -167,146 +167,71 @@ void ConfigDialogue::SetProperties()
                        "but will make maxima 5.35 fail to find its own installation path when the current "
                        "document resides on a different drive than the maxima installation."));
   #endif
-  wxConfig *config = (wxConfig *)wxConfig::Get();
-  wxString mp, mc, ib, mf;
-
-  // The default values for all config items that will be used if there is no saved
-  // configuration data for this item.
-  bool match = true, savePanes = true, UncompressedWXMX=true;
-  bool fixedFontTC = true, changeAsterisk = false, usejsmath = true, keepPercent = true, abortOnError = true, pollStdOut = false;
-  bool enterEvaluates = false, saveUntitled = true,
-    openHCaret = false, AnimateLaTeX = true, TeXExponentsAfterSubscript=false,
-    flowedTextRequested = true, exportInput = true, exportContainsWXMX = false,
-    exportWithMathJAX = true;
-  bool insertAns = true;
-  int labelWidth = 4;
-  int  undoLimit = 0;
-  int showLength = 0;
-  int  bitmapScale = 3;
-  bool fixReorderedIndices = false;
-  bool showUserDefinedLabels = true;
-  int defaultFramerate = 2;
-  int displayedDigits = 100;
-  wxString texPreamble=wxEmptyString;
-  wxString documentclass=wxT("article");
-  int autoSaveInterval = 0;
-  
-#if defined (__WXMAC__)
-  bool usepngCairo=false;
-#else
-  bool usepngCairo=true;
-#endif
-
-  
-  int rs = 0;
-  int lang = wxLANGUAGE_UNKNOWN;
-  int panelSize = 1;
-
-  config->Read(wxT("maxima"), &mp);
-  config->Read(wxT("parameters"), &mc);
-  config->Read(wxT("AUI/savePanes"), &savePanes);
-  config->Read(wxT("usepngCairo"), &usepngCairo);
-  config->Read(wxT("DefaultFramerate"), &defaultFramerate);
-  int defaultPlotWidth = 600;
-  config->Read(wxT("defaultPlotWidth"), &defaultPlotWidth);
-  int defaultPlotHeight = 400;
-  config->Read(wxT("defaultPlotHeight"), &defaultPlotHeight);
-  config->Read(wxT("displayedDigits"), &displayedDigits);
-  config->Read(wxT("OptimizeForVersionControl"), &UncompressedWXMX);
-  config->Read(wxT("AnimateLaTeX"), &AnimateLaTeX);
-  config->Read(wxT("TeXExponentsAfterSubscript"), &TeXExponentsAfterSubscript);
-  config->Read(wxT("flowedTextRequested"), &flowedTextRequested);
-  config->Read(wxT("exportInput"), &exportInput);
-  config->Read(wxT("exportContainsWXMX"), &exportContainsWXMX);
-  config->Read(wxT("exportWithMathJAX"), &exportWithMathJAX);
-  config->Read(wxT("pos-restore"), &rs);
-  config->Read(wxT("matchParens"), &match);
-  config->Read(wxT("showLength"), &showLength);
-  config->Read(wxT("language"), &lang);
-  config->Read(wxT("documentclass"), &documentclass);
-  config->Read(wxT("texPreamble"), &texPreamble);
-  config->Read(wxT("autoSaveInterval"), &autoSaveInterval);
-  config->Read(wxT("changeAsterisk"), &changeAsterisk);
-  config->Read(wxT("fixedFontTC"), &fixedFontTC);
-  config->Read(wxT("panelSize"), &panelSize);
-  config->Read(wxT("enterEvaluates"), &enterEvaluates);
-  config->Read(wxT("saveUntitled"), &saveUntitled);
-  config->Read(wxT("openHCaret"), &openHCaret);
-  config->Read(wxT("insertAns"), &insertAns);
-  config->Read(wxT("labelWidth"), &labelWidth);
-  config->Read(wxT("undoLimit"), &undoLimit);
-  config->Read(wxT("bitmapScale"), &bitmapScale);
-  config->Read(wxT("fixReorderedIndices"), &fixReorderedIndices);
-  config->Read(wxT("showUserDefinedLabels"), &showUserDefinedLabels);
-  config->Read(wxT("usejsmath"), &usejsmath);
-  config->Read(wxT("keepPercent"), &keepPercent);
-  config->Read(wxT("abortOnError"), &abortOnError);
-  config->Read(wxT("pollStdOut"), &pollStdOut);
   unsigned int i = 0;
   for (i = 0; i < LANGUAGE_NUMBER; i++)
-    if (langs[i] == lang)
+    if (langs[i] == config->m_language)
       break;
   if (i < LANGUAGE_NUMBER)
     m_language->SetSelection(i);
   else
     m_language->SetSelection(0);
 
-  m_documentclass->SetValue(documentclass);
-  m_texPreamble->SetValue(texPreamble);
-  m_autoSaveInterval->SetValue(autoSaveInterval);
+  m_documentclass->SetValue(config->m_documentclass);
+  m_texPreamble->SetValue(config->m_texPreamble);
+  m_autoSaveInterval->SetValue(config->m_autoSaveInterval);
 
   Dirstructure dirstruct;
 
   if (wxFileExists(dirstruct.MaximaDefaultName()))
   {
-    m_maximaProgram->SetValue(dirstruct.MaximaDefaultName());
+    m_maximaProgram->SetValue(config->m_dirstruct.MaximaDefaultName());
     m_maximaProgram->Enable(false);
     m_mpBrowse->Enable(false);
   }
   else
   {
     if (mp.Length())
-      m_maximaProgram->SetValue(mp);
+      m_maximaProgram->SetValue(config->m_mp);
     else
-      m_maximaProgram->SetValue(dirstruct.MaximaDefaultName());
+      m_maximaProgram->SetValue(config->m_dirstruct.MaximaDefaultName());
   }
   
-  m_additionalParameters->SetValue(mc);
+  m_additionalParameters->SetValue(config->m_mc);
   if (rs == 1)
-    m_saveSize->SetValue(true);
+    m_saveSize->SetValue(config->m_true);
   else
-    m_saveSize->SetValue(false);
-  m_savePanes->SetValue(savePanes);
-  m_usepngCairo->SetValue(usepngCairo);
+    m_saveSize->SetValue(config->m_false);
+  m_savePanes->SetValue(config->m_savePanes);
+  m_usepngCairo->SetValue(config->m_usepngCairo);
 
-  m_uncomressedWXMX->SetValue(UncompressedWXMX);
-  m_AnimateLaTeX->SetValue(AnimateLaTeX);
-  m_TeXExponentsAfterSubscript->SetValue(TeXExponentsAfterSubscript);
-  m_flowedTextRequested->SetValue(flowedTextRequested);
-  m_exportInput->SetValue(exportInput);
-  m_exportContainsWXMX->SetValue(exportContainsWXMX);
-  m_exportWithMathJAX->SetValue(exportWithMathJAX);
-  m_matchParens->SetValue(match);
+  m_uncomressedWXMX->SetValue(config->m_UncompressedWXMX);
+  m_AnimateLaTeX->SetValue(config->m_AnimateLaTeX);
+  m_TeXExponentsAfterSubscript->SetValue(config->m_TeXExponentsAfterSubscript);
+  m_flowedTextRequested->SetValue(config->m_flowedTextRequested);
+  m_exportInput->SetValue(config->m_exportInput);
+  m_exportContainsWXMX->SetValue(config->m_exportContainsWXMX);
+  m_exportWithMathJAX->SetValue(config->m_exportWithMathJAX);
+  m_matchParens->SetValue(config->m_match);
   m_showLength->SetSelection(showLength);
-  m_changeAsterisk->SetValue(changeAsterisk);
-  m_enterEvaluates->SetValue(enterEvaluates);
-  m_saveUntitled->SetValue(saveUntitled);
-  m_openHCaret->SetValue(openHCaret);
-  m_insertAns->SetValue(insertAns);
-  m_labelWidth->SetValue(labelWidth);
-  m_undoLimit->SetValue(undoLimit);
-  m_bitmapScale->SetValue(bitmapScale);
-  m_fixReorderedIndices->SetValue(fixReorderedIndices);
-  m_showUserDefinedLabels->SetValue(showUserDefinedLabels);
-  m_fixedFontInTC->SetValue(fixedFontTC);
-  m_useJSMath->SetValue(usejsmath);
-  m_keepPercentWithSpecials->SetValue(keepPercent);
-  m_abortOnError->SetValue(abortOnError);
-  m_pollStdOut->SetValue(pollStdOut);
-  m_defaultFramerate->SetValue(defaultFramerate);
-  m_defaultPlotWidth->SetValue(defaultPlotWidth);
-  m_defaultPlotHeight->SetValue(defaultPlotHeight);
-  m_displayedDigits->SetValue(displayedDigits);
+  m_changeAsterisk->SetValue(config->m_changeAsterisk);
+  m_enterEvaluates->SetValue(config->m_enterEvaluates);
+  m_saveUntitled->SetValue(config->m_saveUntitled);
+  m_openHCaret->SetValue(config->m_openHCaret);
+  m_insertAns->SetValue(config->m_insertAns);
+  m_labelWidth->SetValue(config->m_labelWidth);
+  m_undoLimit->SetValue(config->m_undoLimit);
+  m_bitmapScale->SetValue(config->m_bitmapScale);
+  m_fixReorderedIndices->SetValue(config->m_fixReorderedIndices);
+  m_showUserDefinedLabels->SetValue(config->m_showUserDefinedLabels);
+  m_fixedFontInTC->SetValue(config->m_fixedFontTC);
+  m_useJSMath->SetValue(config->m_usejsmath);
+  m_keepPercentWithSpecials->SetValue(config->m_keepPercent);
+  m_abortOnError->SetValue(config->m_abortOnError);
+  m_pollStdOut->SetValue(config->m_pollStdOut);
+  m_defaultFramerate->SetValue(config->m_defaultFramerate);
+  m_defaultPlotWidth->SetValue(config->m_defaultPlotWidth);
+  m_defaultPlotHeight->SetValue(config->m_defaultPlotHeight);
+  m_displayedDigits->SetValue(config->m_displayedDigits);
 
   m_getStyleFont->Enable(false);
 
@@ -545,7 +470,7 @@ wxPanel* ConfigDialogue::CreateMaximaPanel()
   int defaultPort = 4010;
   wxConfig::Get()->Read(wxT("defaultPort"), &defaultPort);
   m_defaultPort = new wxSpinCtrl(panel, -1, wxEmptyString, wxDefaultPosition, wxSize(230, -1), wxSP_ARROW_KEYS, 50, 5000, defaultPort);
-  m_defaultPort->SetValue(defaultPort);
+  m_defaultPort->SetValue(config->m_defaultPort);
   wxStaticText* dp = new wxStaticText(panel, -1, _("Default port for communication with wxMaxima:"));
   sizer->Add(10, 10);
   sizer->Add(dp, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
@@ -557,7 +482,7 @@ wxPanel* ConfigDialogue::CreateMaximaPanel()
   bool wxcd = false;  
   wxConfig::Get()->Read(wxT("wxcd"), &wxcd);
   m_wxcd = new wxCheckBox(panel, -1, _("maxima's pwd is path to document"));
-  m_wxcd-> SetValue(wxcd);
+  m_wxcd-> SetValue(config->m_wxcd);
   sizer->Add(m_wxcd, 0, wxALL, 5);
   sizer->Add(10, 10);
   #endif
@@ -697,57 +622,56 @@ void ConfigDialogue::WriteSettings()
   wxString search = wxT("maxima-htmldir");
   wxArrayString out;
   Config *config = Config::Get();
-  config::m_abortOnError = m_abortOnError->GetValue());
-  config::m_pollStdOut = m_pollStdOut->GetValue());
-  config::m_maxima = m_maximaProgram->GetValue());
-  config::m_parameters = m_additionalParameters->GetValue());
-  config::m_fontSize = m_fontSize);
-  config::m_mathFontsize = m_mathFontSize);
-  config::m_matchParens = m_matchParens->GetValue());
-  config::m_showLength = m_showLength->GetSelection());
-  config::m_fixedFontTC = m_fixedFontInTC->GetValue());
-  config::m_changeAsterisk = m_changeAsterisk->GetValue());
-  config::m_enterEvaluates = m_enterEvaluates->GetValue());
-  config::m_saveUntitled = m_saveUntitled->GetValue());
-  config::m_openHCaret = m_openHCaret->GetValue());
-  config::m_insertAns = m_insertAns->GetValue());
-  config::m_labelWidth = m_labelWidth->GetValue());
-  config::m_undoLimit = m_undoLimit->GetValue());
-  config::m_bitmapScale = m_bitmapScale->GetValue());
-  config::m_fixReorderedIndices = m_fixReorderedIndices->GetValue());
-  config::m_showUserDefinedLabels = m_showUserDefinedLabels->GetValue());
-  config::m_defaultPort = m_defaultPort->GetValue());
+  config->m_abortOnError = m_abortOnError->GetValue());
+  config->m_pollStdOut = m_pollStdOut->GetValue());
+  config->m_maxima = m_maximaProgram->GetValue());
+  config->m_parameters = m_additionalParameters->GetValue());
+  config->m_fontSize = m_fontSize);
+  config->m_mathFontsize = m_mathFontSize);
+  config->m_matchParens = m_matchParens->GetValue());
+  config->m_showLength = m_showLength->GetSelection());
+  config->m_fixedFontTC = m_fixedFontInTC->GetValue());
+  config->m_changeAsterisk = m_changeAsterisk->GetValue());
+  config->m_enterEvaluates = m_enterEvaluates->GetValue());
+  config->m_saveUntitled = m_saveUntitled->GetValue());
+  config->m_openHCaret = m_openHCaret->GetValue());
+  config->m_insertAns = m_insertAns->GetValue());
+  config->m_labelWidth = m_labelWidth->GetValue());
+  config->m_undoLimit = m_undoLimit->GetValue());
+  config->m_bitmapScale = m_bitmapScale->GetValue());
+  config->m_fixReorderedIndices = m_fixReorderedIndices->GetValue());
+  config->m_showUserDefinedLabels = m_showUserDefinedLabels->GetValue());
+  config->m_defaultPort = m_defaultPort->GetValue());
   #ifdef __WXMSW__
-  config::m_wxcd = m_wxcd->GetValue());
+  config->m_wxcd = m_wxcd->GetValue());
   #endif
-  config::m_AUI/savePanes = m_savePanes->GetValue());
-  config::m_usepngCairo = m_usepngCairo->GetValue());
-  config::m_OptimizeForVersionControl = m_uncomressedWXMX->GetValue());
-  config::m_DefaultFramerate = m_defaultFramerate->GetValue());
-  config::m_defaultPlotWidth = m_defaultPlotWidth->GetValue());
-  config::m_defaultPlotHeight = m_defaultPlotHeight->GetValue());
-  config::m_displayedDigits = m_displayedDigits->GetValue());
-  config::m_AnimateLaTeX = m_AnimateLaTeX->GetValue());
-  config::m_TeXExponentsAfterSubscript = m_TeXExponentsAfterSubscript->GetValue());
-  config::m_flowedTextRequested = m_flowedTextRequested->GetValue());
-  config::m_exportInput = m_exportInput->GetValue());
-  config::m_exportContainsWXMX = m_exportContainsWXMX->GetValue());
-  config::m_exportWithMathJAX = m_exportWithMathJAX->GetValue());
-  config::m_usejsmath = m_useJSMath->GetValue());
-  config::m_keepPercent = m_keepPercentWithSpecials->GetValue());
-  config::m_texPreamble = m_texPreamble->GetValue());
-  config::m_autoSaveInterval = m_autoSaveInterval->GetValue());
-  config::m_documentclass = m_documentclass->GetValue());
+  config->m_AUI/savePanes = m_savePanes->GetValue());
+  config->m_usepngCairo = m_usepngCairo->GetValue());
+  config->m_OptimizeForVersionControl = m_uncomressedWXMX->GetValue());
+  config->m_DefaultFramerate = m_defaultFramerate->GetValue());
+  config->m_defaultPlotWidth = m_defaultPlotWidth->GetValue());
+  config->m_defaultPlotHeight = m_defaultPlotHeight->GetValue());
+  config->m_displayedDigits = m_displayedDigits->GetValue());
+  config->m_AnimateLaTeX = m_AnimateLaTeX->GetValue());
+  config->m_TeXExponentsAfterSubscript = m_TeXExponentsAfterSubscript->GetValue());
+  config->m_flowedTextRequested = m_flowedTextRequested->GetValue());
+  config->m_exportInput = m_exportInput->GetValue());
+  config->m_exportContainsWXMX = m_exportContainsWXMX->GetValue());
+  config->m_exportWithMathJAX = m_exportWithMathJAX->GetValue());
+  config->m_usejsmath = m_useJSMath->GetValue());
+  config->m_keepPercent = m_keepPercentWithSpecials->GetValue());
+  config->m_texPreamble = m_texPreamble->GetValue());
+  config->m_autoSaveInterval = m_autoSaveInterval->GetValue());
+  config->m_documentclass = m_documentclass->GetValue());
   if (m_saveSize->GetValue())
-    config::m_saveSize = 1;
+    config->m_saveSize = 1;
   else
-    config::m_saveSize = 0;
+    config->m_saveSize = 0;
   i = m_language->GetSelection();
   if (i > -1 && i < LANGUAGE_NUMBER)
     config->Write(wxT("language"), langs[i]);
 
   WriteStyles();
-  config->Flush();
 }
 
 void ConfigDialogue::OnMpBrowse(wxCommandEvent& event)
@@ -775,7 +699,7 @@ void ConfigDialogue::OnMpBrowse(wxCommandEvent& event)
                    _("Error"),
                    wxOK|wxICON_ERROR);
     else
-      m_maximaProgram->SetValue(file);
+      m_maximaProgram->SetValue(config->m_file);
   }
 }
 
@@ -839,424 +763,16 @@ void ConfigDialogue::OnChangeFontFamily(wxCommandEvent& event)
 
 void ConfigDialogue::ReadStyles(wxString file)
 {
-  wxConfigBase* config;
-  if (file == wxEmptyString)
-    config = wxConfig::Get();
-  else {
-    wxFileInputStream str(file);
-    config = new wxFileConfig(str);
-  }
-
-  m_fontSize = m_mathFontSize = 12;
-  config->Read(wxT("fontsize"), &m_fontSize);
-  config->Read(wxT("mathfontsize"), &m_mathFontSize);
-  config->Read(wxT("Style/fontname"), &m_styleDefault.font);
-  if (m_styleDefault.font.Length())
-    m_getFont->SetLabel(m_styleDefault.font + wxString::Format(wxT(" (%d)"), m_fontSize));
-
-  int encoding = wxFONTENCODING_DEFAULT;
-  config->Read(wxT("fontEncoding"), &encoding);
-  m_fontEncoding = (wxFontEncoding)encoding;
-
-  m_mathFontName = wxEmptyString;
-  config->Read(wxT("Style/Math/fontname"), &m_mathFontName);
-  if (m_mathFontName.Length() > 0)
-    m_getMathFont->SetLabel(m_mathFontName + wxString::Format(wxT(" (%d)"), m_mathFontSize));
-
-  wxString tmp;
-  // Document background color
-  m_styleBackground.color = wxT("white");
-  if (config->Read(wxT("Style/Background/color"),
-                   &tmp)) m_styleBackground.color.Set(tmp);
-
-  // Text background
-  m_styleTextBackground.color = wxT("white");
-  if (config->Read(wxT("Style/TextBackground/color"),
-                   &tmp)) m_styleTextBackground.color.Set(tmp);
-
-  // Highlighting color
-  m_styleHighlight.color = wxT("red");
-  if (config->Read(wxT("Style/Highlight/color"),
-                   &tmp)) m_styleHighlight.color.Set(tmp);
-
-  // Groupcell bracket color
-  m_styleCellBracket.color = wxT("rgb(0,0,0)");
-  if (config->Read(wxT("Style/CellBracket/color"),
-                   &tmp)) m_styleCellBracket.color.Set(tmp);
-
-  // Active groupcell bracket color
-  m_styleActiveCellBracket.color = wxT("rgb(255,0,0)");
-  if (config->Read(wxT("Style/ActiveCellBracket/color"),
-                   &tmp)) m_styleActiveCellBracket.color.Set(tmp);
-
-  // Horizontal caret color/ cursor color
-  m_styleCursor.color = wxT("rgb(0,0,0)");
-  if (config->Read(wxT("Style/Cursor/color"),
-                   &tmp)) m_styleCursor.color.Set(tmp);
-
-  // Outdated cells
-  m_styleOutdated.color = wxT("rgb(153,153,153)");
-  if (config->Read(wxT("Style/Outdated/color"),
-                   &tmp)) m_styleOutdated.color.Set(tmp);
-
-  // Selection color defaults to light grey on windows
-#if defined __WXMSW__
-  m_styleSelection.color = wxColour(wxT("light grey"));
-#else
-  m_styleSelection.color = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-#endif
-  if (config->Read(wxT("Style/Selection/color"),
-                   &tmp)) m_styleSelection.color.Set(tmp);
-
-  // Text equal to the current selection
-  m_styleEqualsSelection.color = wxT("rgb(192,192,255)");
-  if (config->Read(wxT("Style/EqualsSelection/color"),
-                   &tmp)) m_styleEqualsSelection.color.Set(tmp);
-
-#define READ_STYLE(style, where)                                        \
-  if (config->Read(wxT(where "color"), &tmp)) style.color.Set(tmp);     \
-  config->Read(wxT(where "bold"),                                       \
-               &style.bold);                                            \
-  config->Read(wxT(where "italic"),                                     \
-               &style.italic);                                          \
-  config->Read(wxT(where "underlined"),                                 \
-               &style.underlined);
-
-  // Text in math output
-  m_styleDefault.color = wxT("black");
-  m_styleDefault.bold = false;
-  m_styleDefault.italic = false;
-  m_styleDefault.underlined = false;
-  READ_STYLE(m_styleDefault, "Style/NormalText/")
-
-  // Main prompt
-  m_styleMainPrompt.color = wxT("rgb(255,128,128)");
-  m_styleMainPrompt.bold = false;
-  m_styleMainPrompt.italic = false;
-  m_styleMainPrompt.underlined = false;
-  READ_STYLE(m_styleMainPrompt, "Style/MainPrompt/")
-
-  // Other prompt
-  m_styleOtherPrompt.color = wxT("red");
-  m_styleOtherPrompt.bold = false;
-  m_styleOtherPrompt.italic = true;
-  m_styleOtherPrompt.underlined = false;
-  READ_STYLE(m_styleOtherPrompt, "Style/OtherPrompt/")
-
-  // Labels
-  m_styleLabel.color = wxT("rgb(255,192,128)");
-  m_styleLabel.bold = false;
-  m_styleLabel.italic = false;
-  m_styleLabel.underlined = false;
-  READ_STYLE(m_styleLabel, "Style/Label/")
-
-  // User-defined Labels
-  m_styleUserDefinedLabel.color = wxT("rgb(255,64,0)");
-  m_styleUserDefinedLabel.bold = false;
-  m_styleUserDefinedLabel.italic = false;
-  m_styleUserDefinedLabel.underlined = false;
-  READ_STYLE(m_styleUserDefinedLabel, "Style/UserDefinedLabel/")
-
-  // Special
-  m_styleSpecial.color = m_styleDefault.color;
-  m_styleSpecial.bold = false;
-  m_styleSpecial.italic = false;
-  m_styleSpecial.underlined = false;
-  READ_STYLE(m_styleSpecial, "Style/Special/")
-
-  // Input
-  m_styleInput.color = wxT("blue");
-  m_styleInput.bold = false;
-  m_styleInput.italic = false;
-  m_styleInput.underlined = false;
-  READ_STYLE(m_styleInput, "Style/Input/")
-
-  // Number
-  m_styleNumber.color = m_styleDefault.color;
-  m_styleNumber.bold = false;
-  m_styleNumber.italic = false;
-  m_styleNumber.underlined = false;
-  READ_STYLE(m_styleNumber, "Style/Number/")
-
-  // String
-  m_styleString.color = m_styleDefault.color;
-  m_styleString.bold = false;
-  m_styleString.italic = true;
-  m_styleString.underlined = false;
-  READ_STYLE(m_styleString, "Style/String/")
-
-  // Operator
-  m_styleString.color = m_styleDefault.color;
-  m_styleString.bold = false;
-  m_styleString.italic = true;
-  m_styleString.underlined = false;
-  READ_STYLE(m_styleString, "Style/String/Operator")
-
-  // Greek
-  m_styleGreek.color = m_styleDefault.color;
-  m_styleGreek.bold = false;
-  m_styleGreek.italic = false;
-  m_styleGreek.underlined = false;
-  READ_STYLE(m_styleGreek, "Style/Greek/")
-    
-  // Variable
-  m_styleVariable.color = m_styleDefault.color;
-  m_styleVariable.bold = false;
-  m_styleVariable.italic = true;
-  m_styleVariable.underlined = false;
-  READ_STYLE(m_styleVariable, "Style/Variable/")
-
-  // Function
-  m_styleFunction.color = m_styleDefault.color;
-  m_styleFunction.bold = false;
-  m_styleFunction.italic = false;
-  m_styleFunction.underlined = false;
-  READ_STYLE(m_styleFunction, "Style/Function/")
-
-  // Text
-  m_styleText.color = wxT("black");
-  m_styleText.bold = true;
-  m_styleText.italic = false;
-  m_styleText.underlined = false;
-  m_styleText.font = m_styleDefault.font;
-  m_styleText.fontSize = m_fontSize;
-  config->Read(wxT("Style/Text/fontsize"),
-               &m_styleText.fontSize);
-  config->Read(wxT("Style/Text/fontname"),
-               &m_styleText.font);
-  READ_STYLE(m_styleText, "Style/Text/")
-
-  // Variables in highlighted code
-  m_styleCodeHighlightingVariable.color = wxT("rgb(0,128,0)");
-  m_styleCodeHighlightingVariable.bold = false;
-  m_styleCodeHighlightingVariable.italic = true;
-  m_styleCodeHighlightingVariable.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingVariable, "Style/CodeHighlighting/Variable/")
-
-  // Functions in highlighted code
-  m_styleCodeHighlightingFunction.color = wxT("rgb(128,0,0)");
-  m_styleCodeHighlightingFunction.bold = false;
-  m_styleCodeHighlightingFunction.italic = true;
-  m_styleCodeHighlightingFunction.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingFunction, "Style/CodeHighlighting/Function/")
-
-  // Comments in highlighted code
-  m_styleCodeHighlightingComment.color = wxT("rgb(64,64,64)");
-  m_styleCodeHighlightingComment.bold = false;
-  m_styleCodeHighlightingComment.italic = true;
-  m_styleCodeHighlightingComment.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingComment, "Style/CodeHighlighting/Comment/")
-
-  // Numbers in highlighted code
-  m_styleCodeHighlightingNumber.color = wxT("rgb(128,64,0)");
-  m_styleCodeHighlightingNumber.bold = false;
-  m_styleCodeHighlightingNumber.italic = true;
-  m_styleCodeHighlightingNumber.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingNumber, "Style/CodeHighlighting/Number/")
-
-  // Strings in highlighted code
-  m_styleCodeHighlightingString.color = wxT("rgb(0,0,128)");
-  m_styleCodeHighlightingString.bold = false;
-  m_styleCodeHighlightingString.italic = true;
-  m_styleCodeHighlightingString.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingString, "Style/CodeHighlighting/String/")
-
-  // Operators in highlighted code
-  m_styleCodeHighlightingOperator.color = wxT("rgb(0,0,128)");
-  m_styleCodeHighlightingOperator.bold = false;
-  m_styleCodeHighlightingOperator.italic = true;
-  m_styleCodeHighlightingOperator.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingOperator, "Style/CodeHighlighting/Operator/")
-  // Line endings in highlighted code
-  m_styleCodeHighlightingEndOfLine.color = wxT("rgb(128,128,128)");
-  m_styleCodeHighlightingEndOfLine.bold = false;
-  m_styleCodeHighlightingEndOfLine.italic = true;
-  m_styleCodeHighlightingEndOfLine.underlined = false;
-  READ_STYLE(m_styleCodeHighlightingEndOfLine, "Style/CodeHighlighting/EndOfLine/")
-
-  // Subsubsection
-  m_styleSubsubsection.color = wxT("black");
-  m_styleSubsubsection.bold = true;
-  m_styleSubsubsection.italic = false;
-  m_styleSubsubsection.underlined = false;
-  m_styleSubsubsection.font = m_styleDefault.font;
-  m_styleSubsubsection.fontSize = 16;
-  config->Read(wxT("Style/Subsubsection/fontsize"),
-               &m_styleSubsubsection.fontSize);
-  config->Read(wxT("Style/Subsubsection/fontname"),
-               &m_styleSubsubsection.font);
-  READ_STYLE(m_styleSubsubsection, "Style/Subsubsection/")
-  // Subsection
-  m_styleSubsection.color = wxT("black");
-  m_styleSubsection.bold = true;
-  m_styleSubsection.italic = false;
-  m_styleSubsection.underlined = false;
-  m_styleSubsection.font = m_styleDefault.font;
-  m_styleSubsection.fontSize = 16;
-  config->Read(wxT("Style/Subsection/fontsize"),
-               &m_styleSubsection.fontSize);
-  config->Read(wxT("Style/Subsection/fontname"),
-               &m_styleSubsection.font);
-  READ_STYLE(m_styleSubsection, "Style/Subsection/")
-
-  // Section
-  m_styleSection.color = wxT("black");
-  m_styleSection.bold = true;
-  m_styleSection.italic = true;
-  m_styleSection.underlined = false;
-  m_styleSection.font = m_styleDefault.font;
-  m_styleSection.fontSize = 18;
-  config->Read(wxT("Style/Section/fontsize"),
-               &m_styleSection.fontSize);
-  config->Read(wxT("Style/Section/fontname"),
-               &m_styleSection.font);
-  READ_STYLE(m_styleSection, "Style/Section/")
-
-  // Title
-  m_styleTitle.color = wxT("black");
-  m_styleTitle.bold = true;
-  m_styleTitle.italic = false;
-  m_styleTitle.underlined = true;
-  m_styleTitle.font = m_styleDefault.font;
-  m_styleTitle.fontSize = 24;
-  config->Read(wxT("Style/Title/fontsize"),
-               &m_styleTitle.fontSize);
-  config->Read(wxT("Style/Title/fontname"),
-               &m_styleTitle.font);
-  READ_STYLE(m_styleTitle, "Style/Title/")
-
-#undef READ_STYLE
-
   // Set values in dialog
   m_styleFor->SetSelection(0);
-  m_styleColor->SetBackgroundColour(m_styleDefault.color); // color the panel, after the styles are loaded
-  m_boldCB->SetValue(m_styleDefault.bold);
-  m_italicCB->SetValue(m_styleDefault.italic);
-  m_underlinedCB->SetValue(m_styleDefault.underlined);
-
-  if (file != wxEmptyString)
-    delete config;
+  m_styleColor->SetBackgroundColour(config->m_styleDefault.color); // color the panel, after the styles are loaded
+  m_boldCB->SetValue(config->m_m_styleDefault.bold);
+  m_italicCB->SetValue(config->m_m_styleDefault.italic);
+  m_underlinedCB->SetValue(config->m_m_styleDefault.underlined);
 }
 
 void ConfigDialogue::WriteStyles(wxString file)
 {
-  wxConfigBase* config;
-  if (file == wxEmptyString)
-    config = wxConfig::Get();
-  else {
-    wxStringInputStream str(wxEmptyString);
-    config = new wxFileConfig(str);
-  }
-
-  config->Write(wxT("Style/Background/color"),
-                m_styleBackground.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/Highlight/color"),
-                m_styleHighlight.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/TextBackground/color"),
-                m_styleTextBackground.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/CellBracket/color"),
-                m_styleCellBracket.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/ActiveCellBracket/color"),
-                m_styleActiveCellBracket.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/Cursor/color"),
-                m_styleCursor.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/Selection/color"),
-                m_styleSelection.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/EqualsSelection/color"),
-                m_styleEqualsSelection.color.GetAsString(wxC2S_CSS_SYNTAX));
-  config->Write(wxT("Style/Outdated/color"),
-                m_styleOutdated.color.GetAsString(wxC2S_CSS_SYNTAX));
-
-  config::Style/fontname") = m_styleDefault.font);
-  config->Write(wxT("fontEncoding"), (int)m_fontEncoding);
-
-  config::Style/Math/fontname") = m_mathFontName);
-
-#define WRITE_STYLE(style, where)                                       \
-  config->Write(wxT(where "color"), style.color.GetAsString(wxC2S_CSS_SYNTAX)); \
-  config->Write(wxT(where "bold"), style.bold);                         \
-  config->Write(wxT(where "italic"), style.italic);                     \
-  config->Write(wxT(where "underlined"), style.underlined);
-
-  // Normal text
-  WRITE_STYLE(m_styleDefault, "Style/NormalText/")
-
-  // Main prompt
-  WRITE_STYLE(m_styleMainPrompt, "Style/MainPrompt/")
-
-  // Other prompt
-  WRITE_STYLE(m_styleOtherPrompt, "Style/OtherPrompt/")
-
-  // Label
-  WRITE_STYLE(m_styleLabel, "Style/Label/")
-
-  // Label
-  WRITE_STYLE(m_styleUserDefinedLabel, "Style/UserDefinedLabel/")
-
-  // Special
-  WRITE_STYLE(m_styleSpecial, "Style/Special/")
-
-  // Input
-  WRITE_STYLE(m_styleInput, "Style/Input/")
-
-  // Number
-  WRITE_STYLE(m_styleNumber, "Style/Number/")
-
-  // Greek
-  WRITE_STYLE(m_styleGreek, "Style/Greek/")
-
-  // String
-  WRITE_STYLE(m_styleString, "Style/String/")
-
-  // Variable
-  WRITE_STYLE(m_styleVariable, "Style/Variable/")
-
-  // Text
-  config::Style/Text/fontname") = m_styleText.font);
-  config::Style/Text/fontsize") = m_styleText.fontSize);
-  WRITE_STYLE(m_styleText, "Style/Text/")
-
-  // Syntax highlighting
-  WRITE_STYLE(m_styleCodeHighlightingVariable, "Style/CodeHighlighting/Variable/")
-  WRITE_STYLE(m_styleCodeHighlightingFunction, "Style/CodeHighlighting/Function/")
-  WRITE_STYLE(m_styleCodeHighlightingComment,  "Style/CodeHighlighting/Comment/")
-  WRITE_STYLE(m_styleCodeHighlightingNumber,   "Style/CodeHighlighting/Number/")
-  WRITE_STYLE(m_styleCodeHighlightingString,   "Style/CodeHighlighting/String/")
-  WRITE_STYLE(m_styleCodeHighlightingOperator, "Style/CodeHighlighting/Operator/")
-  WRITE_STYLE(m_styleCodeHighlightingEndOfLine,"Style/CodeHighlighting/EndOfLine/")
-
-  // Subsubsection
-  config::Style/Subsubsection/fontname") = m_styleSubsubsection.font);
-  config::Style/Subsubsection/fontsize") = m_styleSubsubsection.fontSize);
-  WRITE_STYLE(m_styleSubsubsection, "Style/Subsubsection/")
-
-  // Subsection
-  config::Style/Subsection/fontname") = m_styleSubsection.font);
-  config::Style/Subsection/fontsize") = m_styleSubsection.fontSize);
-  WRITE_STYLE(m_styleSubsection, "Style/Subsection/")
-
-  // Section
-  config::Style/Section/fontname") = m_styleSection.font);
-  config::Style/Section/fontsize") = m_styleSection.fontSize);
-  WRITE_STYLE(m_styleSection, "Style/Section/")
-
-  // Title
-  config::Style/Title/fontname") = m_styleTitle.font);
-  config::Style/Title/fontsize") = m_styleTitle.fontSize);
-  WRITE_STYLE(m_styleTitle, "Style/Title/")
-
-  // Function names
-  WRITE_STYLE(m_styleFunction, "Style/Function/")
-
-  config->Flush();
-
-  if (file != wxEmptyString)
-  {
-    wxFile fl(file, wxFile::write);
-    wxFileOutputStream str(fl);
-    ((wxFileConfig *)config)->Save(str);
-    delete config;
-  }
 }
 
 void ConfigDialogue::OnChangeColor()

@@ -299,10 +299,13 @@ symbols:
 2             squared
 3             to the power of three
 /2            1/2
+partial       partial sign (the d of dx/dt)
+integral      integral sign
 sq            root
 ii            imaginary
 ee            element
-hb            h barred
+hb or hbar    h barred
+Hbar          H barred
 in            in
 impl,implies  implies
 inf           infinity
@@ -322,7 +325,16 @@ subseteq      subset or equal
 subset        subset
 notsubseteq   not subset or equal
 notsubset     not subset
+approx        approximately
+propto        proportional to
+neq           not equal to
+equiv         equivalent to
+qed           end of proof
+
 @end example
+If a character isn't in the list it is possible to input arbitrary unicode
+characters by pressing @code{<ESC>number of the character<ESC>}.
+@code{<ESC>61<ESC>} therefore results in an @code{a}.
 
 It is to note that a maxima running on a lisp without unicode support
 might not be able to deal with files that contain special unicode
@@ -358,7 +370,8 @@ cogito => sum.
 Other symbols the markdown parser will recognize are @code{<=} and
 @code{>=} for comparisons, a double-pointed double arrow (@code{<=>}),
 single- headed arrows (@code{<->}, @code{->} and @code{<-}) and
-@code{+/-} as the respective sign.
+@code{+/-} as the respective sign. For TeX output also @code{<<} and
+@code{>>} are recognized.
 @subsection Hotkeys
 Most hotkeys can be found in the text of the respective menus.
 Since they are actually taken from the menu text and thus can be customized

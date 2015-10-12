@@ -131,6 +131,7 @@ void MathCtrl::OnPaint(wxPaintEvent& event) {
   wxMemoryDC dcm;
 
   // Get the font size
+  wxConfig *config = (wxConfig *)wxConfig::Get();
 
   // Prepare data
   wxRect rect = GetUpdateRegion().GetBox();
@@ -2945,6 +2946,7 @@ bool MathCtrl::ExportToHTML(wxString file) {
   wxString imgDir;
   // What happens if we split the filename into several parts.
   wxString path, filename, ext;
+  wxConfigBase* config= wxConfig::Get();
 
   bool mathjax = Config::Get()->m_exportWithMathJAX;
   
@@ -4149,6 +4151,7 @@ bool MathCtrl::ExportToWXMX(wxString file,bool markAsSaved)
      - content.xml typically is small and therefore won't get much smaller during
      compression.
   */
+  bool VcFriendlyWXMX=true;
 
   // next zip entry is "content.xml", xml of m_tree
 
