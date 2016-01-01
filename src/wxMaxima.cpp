@@ -1375,7 +1375,7 @@ bool wxMaxima::OpenWXMXFile(wxString file, MathCtrl *document, bool clearDocumen
   wxString filename = wxmxURI + wxT("#zip:content.xml");
   wxFSFile *fsfile = fs.OpenFile(filename);
   
-  if ((fsfile == NULL) || (!xmldoc.Load(*(fsfile->GetStream()))))
+  if ((fsfile == NULL) || (!xmldoc.Load(*(fsfile->GetStream()),wxT("UTF-8"),wxXMLDOC_KEEP_WHITESPACE_NODES)))
   {
     document->Thaw();
     delete fsfile;
@@ -1427,7 +1427,9 @@ bool wxMaxima::OpenWXMXFile(wxString file, MathCtrl *document, bool clearDocumen
 
   // read zoom factor
   wxString doczoom = xmldoc.GetRoot()->GetAttribute(wxT("zoom"),wxT("100"));
-  wxXmlNode *xmlcells = xmldoc.GetRoot()->GetChildren();
+
+  // Read the worksheet's contents.
+  wxXmlNode *xmlcells = xmldoc.GetRoot();
   GroupCell *tree = CreateTreeFromXMLNode(xmlcells, wxmxURI);
 
   // from here on code is identical for wxm and wxmx
@@ -1481,34 +1483,58 @@ bool wxMaxima::OpenWXMXFile(wxString file, MathCtrl *document, bool clearDocumen
 GroupCell* wxMaxima::CreateTreeFromXMLNode(wxXmlNode *xmlcells, wxString wxmxfilename)
 {
   MathParser mp(wxmxfilename);
-  MathCell *tree = NULL;
-  MathCell *last = NULL;
+  GroupCell *tree = NULL;
+  GroupCell *last = NULL;
 
   bool warning = true;
 
+  if (xmlcells)
+    xmlcells = xmlcells->GetChildren();
   if (xmlcells) {
-    last = tree = mp.ParseTag(xmlcells, false); // first cell
-    while (xmlcells->GetNext()) {
+    if(xmlcells->GetName() == wxT("text"))
       xmlcells = xmlcells->GetNext();
-      MathCell *cell = mp.ParseTag(xmlcells, false);
-
-      if (cell != NULL)
+    if (xmlcells) {
+      while (xmlcells != NULL)
       {
-        last->m_next = last->m_nextToDraw = cell;
-        last->m_next->m_previous = last->m_next->m_previousToDraw = last;
-
-        last = last->m_next;
-      }
-      else if (warning)
-      {
-        wxMessageBox(_("Parts of the document will not be loaded correctly!"), _("Warning"),
-                     wxOK | wxICON_WARNING);
-        warning = false;
+        std::cerr<<"name=\""<<xmlcells->GetName()<<"\", content=\""<<xmlcells->GetContent()<<"\"\n";
+        MathCell *mc = mp.ParseTag(xmlcells, false);
+        std::cerr<<"mc="<<mc<<"\n";
+        if(mc != NULL)
+        {
+          GroupCell *cell = dynamic_cast<GroupCell*>(mc);
+          
+          if(last == NULL)
+          {
+            // first cell
+            std::cerr<<"first\n";
+            last = tree = cell;
+          }
+          else
+          {
+            // The rest of the cells
+            std::cerr<<"next\n";
+            last->m_next = last->m_nextToDraw = cell;
+            last->m_next->m_previous = last->m_next->m_previousToDraw = last;
+            
+            last = dynamic_cast<GroupCell*>(last->m_next);
+          }
+        }
+        else if (warning)
+        {
+          wxMessageBox(_("Parts of the document will not be loaded correctly!"), _("Warning"),
+                       wxOK | wxICON_WARNING);
+          warning = false;
+        }
+        xmlcells = xmlcells->GetNext();
+        if(xmlcells)
+        {
+          if(xmlcells->GetName() == wxT("text"))
+            xmlcells = xmlcells->GetNext();
+        }
       }
     }
   }
-
-  return dynamic_cast<GroupCell*>(tree);
+  return tree;
 }
 
 /***
@@ -5165,7 +5191,6 @@ void wxMaxima::InsertMenu(wxCommandEvent& event)
   case menu_convert_to_code:
     if(m_console->GetActiveCell())
     {
-      std::cerr<<"ConvertToCode\n";
       m_console->GetActiveCell()->GetParent()->SetType(GC_TYPE_CODE);
       m_console->Recalculate(true);
       m_console->Refresh();
@@ -5174,7 +5199,6 @@ void wxMaxima::InsertMenu(wxCommandEvent& event)
   case menu_convert_to_comment:
     if(m_console->GetActiveCell())
     {
-      std::cerr<<"ConvertToComment\n";
       m_console->GetActiveCell()->GetParent()->SetType(GC_TYPE_TEXT);
       m_console->Recalculate(true);
       m_console->Refresh();
@@ -5189,7 +5213,6 @@ void wxMaxima::InsertMenu(wxCommandEvent& event)
   case menu_convert_to_title:
     if(m_console->GetActiveCell())
     {
-      std::cerr<<"ConvertToTitle\n";
       m_console->GetActiveCell()->GetParent()->SetType(GC_TYPE_TITLE);
       m_console->Recalculate(true);
       m_console->Refresh();
@@ -5203,7 +5226,6 @@ void wxMaxima::InsertMenu(wxCommandEvent& event)
   case menu_convert_to_section:
     if(m_console->GetActiveCell())
     {
-      std::cerr<<"ConvertToComment\n";
       m_console->GetActiveCell()->GetParent()->SetType(GC_TYPE_SECTION);
       m_console->Recalculate(true);
       m_console->Refresh();
@@ -5217,7 +5239,6 @@ void wxMaxima::InsertMenu(wxCommandEvent& event)
   case menu_convert_to_subsection:
     if(m_console->GetActiveCell())
     {
-      std::cerr<<"ConvertToComment\n";
       m_console->GetActiveCell()->GetParent()->SetType(GC_TYPE_SUBSECTION);
       m_console->Recalculate(true);
       m_console->Refresh();
@@ -5231,7 +5252,6 @@ void wxMaxima::InsertMenu(wxCommandEvent& event)
   case menu_convert_to_subsubsection:
     if(m_console->GetActiveCell())
     {
-      std::cerr<<"ConvertToComment\n";
       m_console->GetActiveCell()->GetParent()->SetType(GC_TYPE_SUBSUBSECTION);
       m_console->Recalculate(true);
       m_console->Refresh();

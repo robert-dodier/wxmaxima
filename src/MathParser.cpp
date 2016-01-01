@@ -199,7 +199,7 @@ MathCell* MathParser::ParseEditorTag(wxXmlNode* node)
     editor->SetType(MC_TYPE_SUBSECTION);
   else if (type == wxT("subsubsection"))
     editor->SetType(MC_TYPE_SUBSUBSECTION);
-
+  
   wxString text = wxEmptyString;
   wxXmlNode *line = node->GetChildren();
   while (line) {
@@ -393,7 +393,7 @@ MathCell* MathParser::ParseText(wxXmlNode* node, int style)
 {
   TextCell* cell = new TextCell;
   wxString str;
-  if (node != NULL && (str = node->GetContent()) != wxEmptyString)
+  if ((node != NULL) && ((str = node->GetContent()) != wxEmptyString))
   {
 #if !wxUSE_UNICODE
     wxString str1(str.wc_str(wxConvUTF8), *wxConvCurrent);
@@ -407,16 +407,16 @@ MathCell* MathParser::ParseText(wxXmlNode* node, int style)
       m_displayedDigits=100;
       wxConfigBase *config = wxConfig::Get();      
       config->Read(wxT("displayedDigits"),&m_displayedDigits);
-
+          
       if (m_displayedDigits<10)m_displayedDigits=10;
       if (str.Length() > m_displayedDigits)
-	{
-	  int left= m_displayedDigits/3;
-	  if (left>30) left=30;
-	  
-	  str = str.Left(left) + wxString::Format(_("[%i digits]"), (int) str.Length() - 2 * left) + str.Right(left);
-	  //	  str = str.Left(left)+wxT("...");
-	}
+      {
+        int left= m_displayedDigits/3;
+        if (left>30) left=30;
+            
+        str = str.Left(left) + wxString::Format(_("[%i digits]"), (int) str.Length() - 2 * left) + str.Right(left);
+        //	  str = str.Left(left)+wxT("...");
+      }
     }
     if(style != TS_ERROR)
       cell->SetType(m_ParserStyle);
@@ -433,7 +433,7 @@ MathCell* MathParser::ParseCharCode(wxXmlNode* node, int style)
 {
   TextCell* cell = new TextCell;
   wxString str;
-  if (node != NULL && (str = node->GetContent()) != wxEmptyString)
+  if ((node != NULL) && ((str = node->GetContent()) != wxEmptyString))
   {
     long code;
     if (str.ToLong(&code))
@@ -930,6 +930,7 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
       }
       else if (tagName == wxT("editor"))
       {
+        std::cerr<<"cell:"<<cell<<"\n";
         if (cell == NULL)
           cell = ParseEditorTag(node);
         else
@@ -1045,7 +1046,7 @@ MathCell* MathParser::ParseLine(wxString s, int style)
     wxStringInputStream xmlStream(su);
 #endif
 
-    xml.Load(xmlStream);
+    xml.Load(xmlStream,wxT("UTF-8"),wxXMLDOC_KEEP_WHITESPACE_NODES);
 
     wxXmlNode *doc = xml.GetRoot();
 
