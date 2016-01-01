@@ -648,7 +648,7 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
   while (node)
   {
     // Parse tags
-    if (node->GetType() == wxXML_ELEMENT_NODE)
+    if ((node->GetType() == wxXML_ELEMENT_NODE) && (node->GetName() != wxT("text")))
     {
       wxString tagName(node->GetName());
 
@@ -930,7 +930,6 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
       }
       else if (tagName == wxT("editor"))
       {
-        std::cerr<<"cell:"<<cell<<"\n";
         if (cell == NULL)
           cell = ParseEditorTag(node);
         else
@@ -958,14 +957,7 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
           cell->AppendCell(ParseTag(node->GetChildren()));
       }
     }
-    // Parse text
-    else
-    {
-      if (cell == NULL)
-        cell = ParseText(node);
-      else
-        cell->AppendCell(ParseText(node));
-    }
+
     if (!all)
       break;
 
@@ -979,10 +971,15 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
     else if (warning)
     {
       wxString name;
+      name.Trim(true);
+      name.Trim(false);
       if(cell != NULL) name = cell->ToString();
-      wxMessageBox(_("Parts of the document will not be loaded correctly!\nFound unknown XML Tag name "+ name), _("Warning"),
-                   wxOK | wxICON_WARNING);
-      warning = false;
+      if(name.Length()!= 0)
+      {
+        wxMessageBox(_("Parts of the document will not be loaded correctly!\nFound unknown XML Tag name "+ name), _("Warning"),
+                     wxOK | wxICON_WARNING);
+        warning = false;
+      }
     }
     
     if (node->GetAttribute(wxT("altCopy"), &altCopy))

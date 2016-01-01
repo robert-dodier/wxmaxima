@@ -1490,49 +1490,38 @@ GroupCell* wxMaxima::CreateTreeFromXMLNode(wxXmlNode *xmlcells, wxString wxmxfil
 
   if (xmlcells)
     xmlcells = xmlcells->GetChildren();
-  if (xmlcells) {
-    if(xmlcells->GetName() == wxT("text"))
-      xmlcells = xmlcells->GetNext();
-    if (xmlcells) {
-      while (xmlcells != NULL)
+  
+  while (xmlcells != NULL)
+  {
+    if(xmlcells->GetName() != wxT("text"))
+    {
+      MathCell *mc = mp.ParseTag(xmlcells, false);
+      if(mc != NULL)
       {
-        std::cerr<<"name=\""<<xmlcells->GetName()<<"\", content=\""<<xmlcells->GetContent()<<"\"\n";
-        MathCell *mc = mp.ParseTag(xmlcells, false);
-        std::cerr<<"mc="<<mc<<"\n";
-        if(mc != NULL)
+        GroupCell *cell = dynamic_cast<GroupCell*>(mc);
+        
+        if(last == NULL)
         {
-          GroupCell *cell = dynamic_cast<GroupCell*>(mc);
+          // first cell
+          last = tree = cell;
+        }
+        else
+        {
+          // The rest of the cells
+          last->m_next = last->m_nextToDraw = cell;
+          last->m_next->m_previous = last->m_next->m_previousToDraw = last;
           
-          if(last == NULL)
-          {
-            // first cell
-            std::cerr<<"first\n";
-            last = tree = cell;
-          }
-          else
-          {
-            // The rest of the cells
-            std::cerr<<"next\n";
-            last->m_next = last->m_nextToDraw = cell;
-            last->m_next->m_previous = last->m_next->m_previousToDraw = last;
-            
-            last = dynamic_cast<GroupCell*>(last->m_next);
-          }
-        }
-        else if (warning)
-        {
-          wxMessageBox(_("Parts of the document will not be loaded correctly!"), _("Warning"),
-                       wxOK | wxICON_WARNING);
-          warning = false;
-        }
-        xmlcells = xmlcells->GetNext();
-        if(xmlcells)
-        {
-          if(xmlcells->GetName() == wxT("text"))
-            xmlcells = xmlcells->GetNext();
+          last = dynamic_cast<GroupCell*>(last->m_next);
         }
       }
+      else if (warning)
+      {
+        wxMessageBox(_("Parts of the document will not be loaded correctly!"), _("Warning"),
+                     wxOK | wxICON_WARNING);
+        warning = false;
+      }
     }
+    xmlcells = xmlcells->GetNext();
   }
   return tree;
 }
