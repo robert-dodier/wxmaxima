@@ -1493,7 +1493,7 @@ GroupCell* wxMaxima::CreateTreeFromXMLNode(wxXmlNode *xmlcells, wxString wxmxfil
   
   while (xmlcells != NULL)
   {
-    if(xmlcells->GetName() != wxT("text"))
+    if(xmlcells->GetType() != wxXML_TEXT_NODE )
     {
       MathCell *mc = mp.ParseTag(xmlcells, false);
       if(mc != NULL)

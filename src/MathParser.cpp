@@ -648,7 +648,7 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
   while (node)
   {
     // Parse tags
-    if ((node->GetType() == wxXML_ELEMENT_NODE) && (node->GetName() != wxT("text")))
+    if ((node->GetType() == wxXML_ELEMENT_NODE) && (node->GetType() != wxXML_TEXT_NODE ))
     {
       wxString tagName(node->GetName());
 
