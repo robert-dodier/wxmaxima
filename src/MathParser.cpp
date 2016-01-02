@@ -169,13 +169,16 @@ MathCell* MathParser::ParseCellTag(wxXmlNode* node)
           if (xmlcells) {
             last = tree = ParseTag(xmlcells, false); // first cell
             while (xmlcells->GetNext()) {
+              if(xmlcells->GetType() != wxXML_TEXT_NODE)
+              {
+                MathCell *cell = ParseTag(xmlcells, false);
+                
+                last->m_next = last->m_nextToDraw = cell;
+                last->m_next->m_previous = last->m_next->m_previousToDraw = last;
+                
+                last = last->m_next;
+              }
               xmlcells = xmlcells->GetNext();
-              MathCell *cell = ParseTag(xmlcells, false);
-              
-              last->m_next = last->m_nextToDraw = cell;
-              last->m_next->m_previous = last->m_next->m_previousToDraw = last;
-              
-              last = last->m_next;
             }
             if (tree)
               group->HideTree((GroupCell *)tree);
@@ -238,6 +241,13 @@ MathCell* MathParser::ParseFracTag(wxXmlNode* node)
   {
     frac->SetNum(ParseTag(child, false));
     child = child->GetNext();
+
+    if (child)
+    {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    
     if (child)
     {
       frac->SetDenom(ParseTag(child, false));
@@ -271,6 +281,11 @@ MathCell* MathParser::ParseDiffTag(wxXmlNode* node)
     child = child->GetNext();
     if (child)
     {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    if (child)
+    {
       diff->SetBase(ParseTag(child, true));
       diff->SetType(m_ParserStyle);
       diff->SetStyle(TS_VARIABLE);
@@ -291,6 +306,11 @@ MathCell* MathParser::ParseSupTag(wxXmlNode* node)
   {
     expt->SetBase(ParseTag(child, false));
     child = child->GetNext();
+    if (child)
+    {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
     if (child)
     {
       MathCell* power = ParseTag(child, false);
@@ -315,10 +335,20 @@ MathCell* MathParser::ParseSubSupTag(wxXmlNode* node)
     child = child->GetNext();
     if (child)
     {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    if (child)
+    {
       MathCell* index = ParseTag(child, false);
       index->SetExponentFlag();
       subsup->SetIndex(index);
       child = child->GetNext();
+      if (child)
+      {
+        if(child->GetType() == wxXML_TEXT_NODE)
+          child = child->GetNext();
+      }
       if (child)
       {
         MathCell* power = ParseTag(child, false);
@@ -344,6 +374,11 @@ MathCell* MathParser::ParseSubTag(wxXmlNode* node)
     child = child->GetNext();
     if (child)
     {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    if (child)
+    {
       MathCell* index = ParseTag(child, false);
       index->SetExponentFlag();
       sub->SetIndex(index);
@@ -367,6 +402,11 @@ MathCell* MathParser::ParseAtTag(wxXmlNode* node)
     child = child->GetNext();
     if (child)
     {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    if (child)
+    {
       at->SetIndex(ParseTag(child, false));
       at->SetType(m_ParserStyle);
       at->SetStyle(TS_VARIABLE);
@@ -385,6 +425,11 @@ MathCell* MathParser::ParseFunTag(wxXmlNode* node)
   {
     fun->SetName(ParseTag(child, false));
     child = child->GetNext();
+    if (child)
+    {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
     if (child)
     {
       fun->SetType(m_ParserStyle);
@@ -513,8 +558,18 @@ MathCell* MathParser::ParseLimitTag(wxXmlNode* node)
     child = child->GetNext();
     if (child)
     {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    if (child)
+    {
       limit->SetUnder(ParseTag(child, false));
       child = child->GetNext();
+      if (child)
+      {
+        if(child->GetType() == wxXML_TEXT_NODE)
+          child = child->GetNext();
+      }
       if (child)
       {
         limit->SetBase(ParseTag(child, false));
@@ -543,9 +598,19 @@ MathCell* MathParser::ParseSumTag(wxXmlNode* node)
     child = child->GetNext();
     if (child)
     {
+      if(child->GetType() == wxXML_TEXT_NODE)
+        child = child->GetNext();
+    }
+    if (child)
+    {
       if (type != wxT("lsum"))
         sum->SetOver(ParseTag(child, false));
       child = child->GetNext();
+      if (child)
+      {
+        if(child->GetType() == wxXML_TEXT_NODE)
+          child = child->GetNext();
+      }
       if (child)
       {
         sum->SetBase(ParseTag(child, false));
@@ -573,12 +638,27 @@ MathCell* MathParser::ParseIntTag(wxXmlNode* node)
       child = child->GetNext();
       if (child)
       {
+        if(child->GetType() == wxXML_TEXT_NODE)
+          child = child->GetNext();
+      }
+      if (child)
+      {
         in->SetOver(ParseTag(child, false));
         child = child->GetNext();
         if (child)
         {
+          if(child->GetType() == wxXML_TEXT_NODE)
+            child = child->GetNext();
+        }
+        if (child)
+        {
           in->SetBase(ParseTag(child, false));
           child = child->GetNext();
+          if (child)
+          {
+            if(child->GetType() == wxXML_TEXT_NODE)
+              child = child->GetNext();
+          }
           if (child)
           {
             in->SetVar(ParseTag(child, true));
@@ -596,6 +676,11 @@ MathCell* MathParser::ParseIntTag(wxXmlNode* node)
     {
       in->SetBase(ParseTag(child, false));
       child = child->GetNext();
+      if (child)
+      {
+        if(child->GetType() == wxXML_TEXT_NODE)
+          child = child->GetNext();
+      }
       if (child)
       {
         in->SetVar(ParseTag(child, true));
@@ -633,8 +718,11 @@ MathCell* MathParser::ParseTableTag(wxXmlNode* node)
     wxXmlNode* cells = rows->GetChildren();
     while (cells)
     {
-      matrix->NewColumn();
-      matrix->AddNewCell(ParseTag(cells, false));
+      if(cells->GetType() != wxXML_TEXT_NODE)
+      {
+        matrix->NewColumn();
+        matrix->AddNewCell(ParseTag(cells, false));
+      }
       cells = cells->GetNext();
     }
     rows = rows->GetNext();
