@@ -965,6 +965,20 @@ MathCell* MathParser::ParseTag(wxXmlNode* node, bool all)
           cell->AppendCell(ParseTag(node->GetChildren()));
       }
     }
+    else
+    {
+      // We got a text node between two tags - which should be impossible
+      // except if one counts whitespace as text node - which wxWidgets does
+      // if we don't instruct it discarding all whitespace in front of an &.
+      wxString contents = node->GetContent();
+
+      // Let's see if the text tag is non-whitespace.
+      contents.Trim();
+      wxASSERT_MSG(
+        contents.Length()<=0,
+        wxString::Format(_("Bug: Found unexpected text between XML nodes: %s"),contents)
+        );
+    }
 
     if (!all)
       break;
