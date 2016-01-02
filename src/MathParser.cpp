@@ -97,8 +97,7 @@ MathCell* MathParser::ParseCellTag(wxXmlNode* node)
         if (children->GetName() == wxT("output"))
         {
           MathCell *tag = ParseTag(children->GetChildren());
-          if(tag != NULL)
-            group->AppendOutput(tag);
+          group->AppendOutput(tag);
         }
       }
       children = children->GetNext();
